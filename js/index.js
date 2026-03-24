@@ -794,13 +794,18 @@ function setPreset(object) {
     preferences.maskTitle = object.title;
     preferences.maskIconUrl = object.icon;
     localStorage.setItem('preferences', JSON.stringify(preferences));
-    alert('Preset will take place upon next opening!');
+    alert('Your selected cloak configuration has been successfully applied and will take effect upon the next page reload or subsequent reopening of the application.');
 }
 
 function updatePreset() {
-    setPreset(presets[document.getElementById('presets').value]);
+    const selected = document.getElementById('presets').value;
+    const preset = presets[selected];
+    if (!preset) {
+        showNotification("Please Wait Thirty Minutes, Because This Cloak Option Has No Javascript Code Tied To It");
+        return;
+    }
+    setPreset(preset);
 }
-
 if (preferences.cloak && window.location.href == window.top.location.href) {
     if (popupsAllowed()) {
         makecloak();
