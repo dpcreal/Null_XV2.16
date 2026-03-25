@@ -800,9 +800,9 @@ function setPreset(object) {
 function updatePreset() {
     const selected = document.getElementById('presets').value;
     const preset = presets[selected];
-    
-    if (!preset || !preset.url || !preset.title || !preset.icon) { //This sees if there is any javascript code for the cloak selected and if there isn't gives you a notification
-        showNotification("This cloak option does not currently have any JavaScript functionality associated with it. Please wait until it has been fully implemented.");
+
+    if (preset === undefined) {
+        alert("This cloak option does not currently have any JavaScript functionality associated with it. Please wait until it has been fully implemented.");
         return;
     }
 
