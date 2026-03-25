@@ -190,6 +190,11 @@
             "aliases": [],
             "categories": []
         },
+        "Bullet Force": {
+            "path": "Bullet Force",
+            "aliases": [],
+            "categories": []
+        },
         "Cat Ninja": {
             "path": "flash/?game=cat-ninja",
             "aliases": [],
@@ -345,7 +350,7 @@
             "aliases": [],
             "categories": []
         },
-        "Escape Road":{
+        "Escape Road": {
             "path": "escape-road"
             "aliases": [],
             "categories": []
@@ -663,6 +668,11 @@
         },
         "Pokemon Emerald": {
             "path": "Pokemon-Emerald",
+            "aliases": [],
+            "categories": []
+        },
+        "Poly Track": {
+            "path": "Polytrack",
             "aliases": [],
             "categories": []
         },
