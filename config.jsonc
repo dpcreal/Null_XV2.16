@@ -811,6 +811,11 @@
             "aliases": [],
             "categories": []
         },
+        "SkinWalker"
+            "path": "skinwalker",
+            "aliases": [],
+            "categories": []
+        },
         "Slice Master": {
             "path": "slice-master",
             "aliases": [],
