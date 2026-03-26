@@ -1,12 +1,11 @@
 function changeLoadingTip() {
     const tips = [
-        'Ur gay frfr',
-        'Read a book idiot',
-        'FUCK YOU',
-        "pls kys",
-        'wait for it load',
-        'wait holy',
-        'DONT TELL ME TO ADD GAME BUM BUMS',
+        'Play New Games!',
+        'Loading....',
+        'All hail Trump',
+        "Please gift me keys",
+        'Currently loading',
+        'Adding new games!',
     ];
     const element = document.getElementsByClassName('loading-tip')[0];
 
