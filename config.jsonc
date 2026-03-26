@@ -205,6 +205,11 @@
             "aliases": [],
             "categories": []
         },
+        "Capybara Clicker": {
+            "path": "capybara-clicker",
+            "aliases": [],
+            "categories": []
+        },
         "Curveball": {
             "path": "flash/?game=curveball",
             "aliases": [],
