@@ -1,8 +1,7 @@
-let currentMenu = $('.homepage');
-
 $('.column button .card').on('click', function () {
     let nextMenu = this.getAttribute('data');
 
+    // 1. Handle Proxy Logic
     if (nextMenu === 'proxy') {
         if (!config['proxy']) {
             $('#disabled').showModal();
@@ -14,10 +13,20 @@ $('.column button .card').on('click', function () {
             $('#page-loader iframe')[0].focus();
         });
         currentMenu = $('#page-loader');
-        inGame = !preferences.background; // if background is disabled (false) then inGame is set to to true turning off the background
+        inGame = !preferences.background; 
         return;
     }
 
+    // 2. Handle Sign-in/Account Logic (The New Part)
+    if (nextMenu === 'signin') {
+        $('#everything-else').fadeOut(300, () => {
+            $('.signin').fadeIn(200);
+        });
+        currentMenu = $('.signin');
+        return;
+    }
+
+    // 3. Handle All Other Menus (Games, Settings, etc.)
     currentMenu.fadeOut(300, () => {
         $('.' + nextMenu).fadeIn(200);
     });
@@ -398,14 +407,15 @@ const sequences = [
    * @return {void}
    */
   function returnHome() {
-      currentMenu.fadeOut(300, () => {
-          $('#everything-else').fadeIn(200);
-          $('.games').hide();
-          $('.homepage').fadeIn(200);
-      });
-      currentMenu = $('.homepage');
-      inGame = !preferences.background; // if background is disabled (false) then inGame is set to to true turning off the background
-  }
+    currentMenu.fadeOut(300, () => {
+        $('#everything-else').fadeIn(200);
+        $('.games').hide();
+        $('.signin').hide(); // Ensures the signin page is cleared
+        $('.homepage').fadeIn(200);
+    });
+    currentMenu = $('.homepage');
+    inGame = !preferences.background;
+}
 
   /**
 function toggleStar(event, star) {
