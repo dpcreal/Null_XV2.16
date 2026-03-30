@@ -27,6 +27,11 @@
   <!-- now loading css -->
   <link href="css/loading.css" rel="stylesheet" type="text/css" />
   <link href="css/style.css" rel="stylesheet" type="text/css" />
+  <style>
+  .hidden { display: none !important; }
+  .success { color: #2ecc71; font-weight: bold; }
+  .error { color: #e74c3c; font-weight: bold; }
+</style>
 </head>
 
 <body>
@@ -115,7 +120,18 @@
         </div>
       </button>
 </div>
-        <div class="column">
+     <div class="column">
+  <button>
+    <div class="card" data="signin">
+      <div class="img-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#8b00ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </div>
+      <h5>Account</h5>
+      <p>Sign in or create an account to save your game progress and settings!</p>
+    </div>
+  </button>
+</div>
+     <div class="column">
           <button>
             <div class="card" data="settings">
               <div class="img-container">
@@ -334,6 +350,41 @@
         </div>
       </div>
     </div>
+ <div class="signin">
+  <div class="setting-bg" style="max-width: 400px; margin: 0 auto;">
+    <div id="authContainer">
+       <div style="display:flex; gap: 10px; margin-bottom: 20px;">
+          <button onclick="switchAuthTab('signup')" id="tab-signup" class="save-button">Sign Up</button>
+          <button onclick="switchAuthTab('login')" id="tab-login" class="save-button" style="background:#444;">Login</button>
+       </div>
+
+       <div id="signupArea">
+          <h5>Create Account</h5>
+          <input type="text" id="regUser" placeholder="Username" class="text-field" style="margin-bottom:10px; width:100%;">
+          <input type="password" id="regPass" placeholder="Password" class="text-field" style="margin-bottom:10px; width:100%;">
+          <button class="submit-button" onclick="doSignup()">Register</button>
+       </div>
+
+       <div id="loginArea" class="hidden">
+          <h5>Login</h5>
+          <input type="text" id="logUser" placeholder="Username" class="text-field" style="margin-bottom:10px; width:100%;">
+          <input type="password" id="logPass" placeholder="Password" class="text-field" style="margin-bottom:10px; width:100%;">
+          <button class="submit-button" onclick="doLogin()">Login</button>
+       </div>
+       <p id="authMsg" style="margin-top:15px;"></p>
+    </div>
+
+    <div id="accountArea" class="hidden">
+       <h4>Your Account</h4>
+       <p>Logged in as: <strong id="userDisplay" class="success">User</strong></p>
+       <div style="padding: 15px; background: #111; border-radius: 8px; margin-top: 10px;">
+          <p>Access Level: Member</p>
+          <p>Status: Verified</p>
+       </div>
+       <button class="save-button" style="background: #ff4b2b; margin-top: 20px;" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+</div>
   </section>
   <section id="page-loader">
     <iframe id="proxyFrame" 
@@ -368,6 +419,50 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.8.0/lib/p5.min.js" defer></script>
   <script src="js/bg.js" defer></script>
   <script src="js/index.js" defer></script>
+  <script>
+// Local Database logic
+let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
+
+function switchAuthTab(type) {
+  document.getElementById('signupArea').classList.toggle('hidden', type === 'login');
+  document.getElementById('loginArea').classList.toggle('hidden', type === 'signup');
+  document.getElementById('tab-signup').style.background = (type === 'signup') ? '' : '#444';
+  document.getElementById('tab-login').style.background = (type === 'login') ? '' : '#444';
+}
+
+function doSignup() {
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  const msg = document.getElementById('authMsg');
+  if(u.length < 3) { msg.innerHTML = "<span class='error'>Username too short!</span>"; return; }
+  if(db.some(user => user.u === u)) { msg.innerHTML = "<span class='error'>User already exists!</span>"; return; }
+  
+  db.push({u, p});
+  localStorage.setItem('null_x_users', JSON.stringify(db));
+  msg.innerHTML = "<span class='success'>Registered! Now click Login.</span>";
+}
+
+function doLogin() {
+  const u = document.getElementById('logUser').value.trim();
+  const p = document.getElementById('logPass').value;
+  const found = db.find(user => user.u === u && user.p === p);
+  
+  if(found) {
+    document.getElementById('userDisplay').innerText = u;
+    document.getElementById('authContainer').classList.add('hidden');
+    document.getElementById('accountArea').classList.remove('hidden');
+  } else {
+    document.getElementById('authMsg').innerHTML = "<span class='error'>Invalid username or password.</span>";
+  }
+}
+
+function doLogout() {
+  document.getElementById('authContainer').classList.remove('hidden');
+  document.getElementById('accountArea').classList.add('hidden');
+  document.getElementById('logUser').value = '';
+  document.getElementById('logPass').value = '';
+}
+</script>
 </body>
 
 </html>
