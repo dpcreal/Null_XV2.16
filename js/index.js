@@ -1,13 +1,17 @@
 let currentMenu = $('.homepage');
+let isSignedIn = false; 
+let inGame = false; 
+const preferences = JSON.parse(localStorage.getItem('preferences')) || { cloak: true, background: true };
 let isSignedIn = false; // Set to true to test the member features
 
 // THE MAIN NAVIGATION RENDERER
 // We keep this structure identical to your original to prevent "Grey Screens"
-$('.column button .card, #smallSigninCard').on('click', function () {
+$(document).on('click', '.column button .card, #smallSigninCard', function () {
     let nextMenu = this.getAttribute('data');
+    if (!nextMenu) return;
 
-    // Handle the small account button UI
     $('#smallSigninCard').fadeOut(200);
+    
     if (isSignedIn) {
         $('.member-sidebar').show();
         $('#floatingSidebarBtn').show();
@@ -28,7 +32,6 @@ $('.column button .card, #smallSigninCard').on('click', function () {
         return;
     }
 
-    // New specific check for the Sign-In page
     if (nextMenu === 'signin') {
         currentMenu.fadeOut(300, () => {
             $('.signin').fadeIn(200);
@@ -37,7 +40,6 @@ $('.column button .card, #smallSigninCard').on('click', function () {
         return;
     }
 
-    // Default transition for Games, Settings, etc.
     currentMenu.fadeOut(300, () => {
         $('.' + nextMenu).fadeIn(200);
     });
@@ -799,23 +801,20 @@ const sequences = [
 
    */
 
-  function returnHome() {
-
-      currentMenu.fadeOut(300, () => {
-
-          $('#everything-else').fadeIn(200);
-
-          $('.games').hide();
-
-          $('.homepage').fadeIn(200);
-
-      });
-
-      currentMenu = $('.homepage');
-
-      inGame = !preferences.background; // if background is disabled (false) then inGame is set to to true turning off the background
-
-  }
+  ffunction returnHome() {
+    currentMenu.fadeOut(300, () => {
+        $('#everything-else').fadeIn(200);
+        $('.games, .signin, .settings').hide(); 
+        $('.homepage').fadeIn(200);
+        
+        // Reset Sidebar/Account UI
+        $('#smallSigninCard').fadeIn(200);
+        $('.member-sidebar').hide().addClass('collapsed');
+        $('#floatingSidebarBtn').hide();
+    });
+    currentMenu = $('.homepage');
+    inGame = !preferences.background;
+}
 
 
 
