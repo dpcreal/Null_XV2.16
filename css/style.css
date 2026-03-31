@@ -790,3 +790,118 @@ button.in-game-button[attr-snapped='true'] img {
     font-weight: 600;
     font-family: var(--font-family);
 }
+/* ============================================= */
+/* NEW: Small Sign-in Card (Bottom Right Corner) */
+/* ============================================= */
+.small-signin-card {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 210px;
+  height: 92px;
+  background: #3498db;
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  font-weight: bold;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  cursor: pointer;
+  z-index: 950;
+  transition: all 0.3s ease;
+  text-align: center;
+  padding: 0 15px;
+  line-height: 1.3;
+}
+
+.small-signin-card:hover {
+  transform: scale(1.06);
+  background: #2980b9;
+}
+
+/* ============================================= */
+/* NEW: Collapsible Member Sidebar (Left Side)   */
+/* ============================================= */
+.member-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: #1f2a38;
+  color: #ddd;
+  z-index: 900;
+  transition: all 0.35s ease;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: 3px 0 15px rgba(0,0,0,0.4);
+}
+
+.member-sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #34495e;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  color: #fff;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* Floating button when sidebar is collapsed */
+.floating-sidebar-toggle {
+  position: fixed;
+  left: 15px;
+  top: 20px;
+  width: 52px;
+  height: 52px;
+  background: #1f2a38;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 26px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.floating-sidebar-toggle:hover {
+  background: #2c3e50;
+}
+
+/* Push main content when sidebar is open */
+#everything-else {
+  transition: margin-left 0.35s ease;
+}
+
+#everything-else.with-sidebar {
+  margin-left: 280px;
+}
