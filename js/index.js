@@ -801,7 +801,7 @@ const sequences = [
 
    */
 
-  ffunction returnHome() {
+  function returnHome() {
     currentMenu.fadeOut(300, () => {
         $('#everything-else').fadeIn(200);
         $('.games, .signin, .settings').hide(); 
