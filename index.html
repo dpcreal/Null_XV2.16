@@ -323,8 +323,10 @@
     <div class="small-signin-card" id="smallSigninCard">
       Sign In / Account
     </div>
-  <!--</section>
-  <div class="member-sidebar" id="memberSidebar">
+  <div class="small-signin-card" id="smallSigninCard">
+      Sign In / Account
+    </div>
+  </section> <div class="member-sidebar" id="memberSidebar" style="display: none;">
     <div class="sidebar-header">
       <h3>Member Features</h3>
       <button class="sidebar-toggle" id="sidebarCollapseBtn">←</button>
@@ -332,16 +334,16 @@
     <div style="opacity: 0.85;">
       Special member features will go here later...
     </div>
-  </div>  Member side bar.
+  </div> 
 
-  <!-- Floating button to reopen sidebar -->
-  <button class="floating-sidebar-toggle" id="floatingSidebarBtn">→</button>
-  <section id="page-loader">
+  <button class="floating-sidebar-toggle" id="floatingSidebarBtn" style="display: none;">→</button>
+  
+  <section id="page-loader" style="display: none;">
     <iframe id="proxyFrame" 
         src="" 
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads" 
         style="width:100%; height:100vh; border:none; background:#111;">
-</iframe>
+    </iframe>
     <button id="gameButton" class="in-game-button">
       <svg class="svg-inline--fa fa-chevron-left fa-w-10" aria-hidden="true" focusable="false" data-prefix="fas"
         data-icon="chevron-left" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" data-fa-i2svg="">
@@ -349,7 +351,6 @@
           d="M34.52 239.03L228.87 44.69c9.37-9.37 24.57-9.37 33.94 0l22.67 22.67c9.36 9.36 9.37 24.52.04 33.9L131.49 256l154.02 154.75c9.34 9.38 9.32 24.54-.04 33.9l-22.67 22.67c-9.37 9.37-24.57 9.37-33.94 0L34.52 272.97c-9.37-9.37-9.37-24.57 0-33.94z">
         </path>
       </svg>
-      <!-- <i class="fas fa-chevron-left"></i> Font Awesome fontawesome.com -->
       <img src="imgs/NX.png" width="36" height="36" alt="Logo" />
     </button>
     <button id="refresh" class="in-game-button">
@@ -360,21 +361,21 @@
           d="M34.52 239.03L228.87 44.69c9.37-9.37 24.57-9.37 33.94 0l22.67 22.67c9.36 9.36 9.37 24.52.04 33.9L131.49 256l154.02 154.75c9.34 9.38 9.32 24.54-.04 33.9l-22.67 22.67c-9.37 9.37-24.57 9.37-33.94 0L34.52 272.97c-9.37-9.37-9.37-24.57 0-33.94z">
         </path>
       </svg>
-      <!-- <i class="fas fa-chevron-left"></i> Font Awesome fontawesome.com -->
     </button>
   </section>
+
   <script src="js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="js/loading.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.8.0/lib/p5.min.js" defer></script>
   <script src="js/bg.js" defer></script>
   <script src="js/index.js" defer></script>
-    <script>
+  
+  <script>
     // Local Database logic
     let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
 
-    // Sidebar + Small Card Logic
-    let isSignedIn = false;
+    // FIX: Removed the duplicate "let isSignedIn = false;" here. It now correctly uses the one from index.js!
 
     const sidebar = document.getElementById('memberSidebar');
     const floatingBtn = document.getElementById('floatingSidebarBtn');
@@ -384,7 +385,11 @@
 
     function toggleSidebar() {
       sidebar.classList.toggle('collapsed');
-      mainContent.classList.toggle('with-sidebar');
+      
+      // Safety check to ensure mainContent exists before toggling
+      if(mainContent) {
+          mainContent.classList.toggle('with-sidebar');
+      }
 
       if (sidebar.classList.contains('collapsed')) {
         collapseBtn.textContent = '→';
@@ -395,12 +400,7 @@
       }
     }
 
-    collapseBtn.addEventListener('click', toggleSidebar);
-    floatingBtn.addEventListener('click', toggleSidebar);
-
-    smallCard.addEventListener('click', () => {
-      alert("Sign In / Account panel would open here.");
-    });
+    // Notice we removed the smallCard click listener here because index.js is handling it now!
 
     function doLogin() {
       const u = document.getElementById('logUser') ? document.getElementById('logUser').value.trim() : '';
@@ -408,7 +408,7 @@
       const found = db.find(user => user.u === u && user.p === p);
 
       if (found) {
-        isSignedIn = true;
+        isSignedIn = true; // Updates the global variable correctly now
         sidebar.style.display = 'block';
         smallCard.style.background = '#2ecc71';
         smallCard.innerHTML = `Account<br><small>(${u})</small>`;
@@ -419,7 +419,7 @@
     }
 
     function doLogout() {
-      isSignedIn = false;
+      isSignedIn = false; // Updates the global variable correctly now
       sidebar.style.display = 'none';
       smallCard.style.background = '#3498db';
       smallCard.innerHTML = 'Sign In / Account';
@@ -431,5 +431,4 @@
     function doSignup() { alert("Use the small card in bottom right for now."); }
   </script>
 </body>
-
 </html>
