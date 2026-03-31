@@ -1,7 +1,17 @@
 let currentMenu = $('.homepage');
+let isSignedIn = false; // Set to true to test the member features
 
-$('.column button .card').on('click', function () {
+// THE MAIN NAVIGATION RENDERER
+// We keep this structure identical to your original to prevent "Grey Screens"
+$('.column button .card, #smallSigninCard').on('click', function () {
     let nextMenu = this.getAttribute('data');
+
+    // Handle the small account button UI
+    $('#smallSigninCard').fadeOut(200);
+    if (isSignedIn) {
+        $('.member-sidebar').show();
+        $('#floatingSidebarBtn').show();
+    }
 
     if (nextMenu === 'proxy') {
         if (!config['proxy']) {
@@ -14,42 +24,39 @@ $('.column button .card').on('click', function () {
             $('#page-loader iframe')[0].focus();
         });
         currentMenu = $('#page-loader');
-        inGame = !preferences.background; // if background is disabled (false) then inGame is set to to true turning off the background
+        inGame = !preferences.background; 
         return;
     }
 
+    // New specific check for the Sign-In page
+    if (nextMenu === 'signin') {
+        currentMenu.fadeOut(300, () => {
+            $('.signin').fadeIn(200);
+        });
+        currentMenu = $('.signin');
+        return;
+    }
+
+    // Default transition for Games, Settings, etc.
     currentMenu.fadeOut(300, () => {
         $('.' + nextMenu).fadeIn(200);
     });
     currentMenu = $('.' + nextMenu);
 });
 
-        currentMenu = $('#page-loader');
-
-        inGame = !preferences.background; // if background is disabled (false) then inGame is set to to true turning off the background
-
-        return;
-
+// SIDEBAR TOGGLE (Does not interfere with Cloak)
+$(document).on('click', '#sidebarCollapseBtn, #floatingSidebarBtn', function() {
+    $('.member-sidebar').toggleClass('collapsed');
+    if ($('.member-sidebar').hasClass('collapsed')) {
+        $('#floatingSidebarBtn').fadeIn(100);
+    } else {
+        $('#floatingSidebarBtn').fadeOut(100);
     }
-
-
-
-    currentMenu.fadeOut(300, () => {
-
-        $('.' + nextMenu).fadeIn(200);
-
-    });
-
-    currentMenu = $('.' + nextMenu);
-
 });
 
-
-
+// RESTORED ORIGINAL LISTENERS
 $('logo img').on('click', returnHome);
-
 $('#gameButton').on('click', returnHome);
-
 $('#refresh').on('click', refreshPage);
 
 
