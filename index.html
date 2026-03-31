@@ -316,43 +316,27 @@
           <button class="save-button" onClick="saveColorChanges()">Save Changes</button>
         </div>
       </div>
+    </div> 
+        </div>   <!-- this is the closing of .settings -->
+
+    <!-- NEW: Small Sign-in Card - Bottom Right Corner -->
+    <div class="small-signin-card" id="smallSigninCard">
+      Sign In / Account
     </div>
- <div class="signin">
-  <div class="setting-bg" style="max-width: 400px; margin: 0 auto;">
-    <div id="authContainer">
-       <div style="display:flex; gap: 10px; margin-bottom: 20px;">
-          <button onclick="switchAuthTab('signup')" id="tab-signup" class="save-button">Sign Up</button>
-          <button onclick="switchAuthTab('login')" id="tab-login" class="save-button" style="background:#444;">Login</button>
-       </div>
-
-       <div id="signupArea">
-          <h5>Create Account</h5>
-          <input type="text" id="regUser" placeholder="Username" class="text-field" style="margin-bottom:10px; width:100%;">
-          <input type="password" id="regPass" placeholder="Password" class="text-field" style="margin-bottom:10px; width:100%;">
-          <button class="submit-button" onclick="doSignup()">Register</button>
-       </div>
-
-       <div id="loginArea" class="hidden">
-          <h5>Login</h5>
-          <input type="text" id="logUser" placeholder="Username" class="text-field" style="margin-bottom:10px; width:100%;">
-          <input type="password" id="logPass" placeholder="Password" class="text-field" style="margin-bottom:10px; width:100%;">
-          <button class="submit-button" onclick="doLogin()">Login</button>
-       </div>
-       <p id="authMsg" style="margin-top:15px;"></p>
+  </section>
+    <!-- Member Sidebar (Left side - only for signed in users) -->
+  <div class="member-sidebar" id="memberSidebar">
+    <div class="sidebar-header">
+      <h3>Member Features</h3>
+      <button class="sidebar-toggle" id="sidebarCollapseBtn">←</button>
     </div>
-
-    <div id="accountArea" class="hidden">
-       <h4>Your Account</h4>
-       <p>Logged in as: <strong id="userDisplay" class="success">User</strong></p>
-       <div style="padding: 15px; background: #111; border-radius: 8px; margin-top: 10px;">
-          <p>Access Level: Member</p>
-          <p>Status: Verified</p>
-       </div>
-       <button class="save-button" style="background: #ff4b2b; margin-top: 20px;" onclick="doLogout()">Logout</button>
+    <div style="opacity: 0.85;">
+      Special member features will go here later...
     </div>
   </div>
-</div>
-  </section>
+
+  <!-- Floating button to reopen sidebar -->
+  <button class="floating-sidebar-toggle" id="floatingSidebarBtn">→</button>
   <section id="page-loader">
     <iframe id="proxyFrame" 
         src="" 
@@ -386,50 +370,67 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.8.0/lib/p5.min.js" defer></script>
   <script src="js/bg.js" defer></script>
   <script src="js/index.js" defer></script>
-  <script>
-// Local Database logic
-let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
+    <script>
+    // Local Database logic
+    let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
 
-function switchAuthTab(type) {
-  document.getElementById('signupArea').classList.toggle('hidden', type === 'login');
-  document.getElementById('loginArea').classList.toggle('hidden', type === 'signup');
-  document.getElementById('tab-signup').style.background = (type === 'signup') ? '' : '#444';
-  document.getElementById('tab-login').style.background = (type === 'login') ? '' : '#444';
-}
+    // Sidebar + Small Card Logic
+    let isSignedIn = false;
 
-function doSignup() {
-  const u = document.getElementById('regUser').value.trim();
-  const p = document.getElementById('regPass').value;
-  const msg = document.getElementById('authMsg');
-  if(u.length < 3) { msg.innerHTML = "<span class='error'>Username too short!</span>"; return; }
-  if(db.some(user => user.u === u)) { msg.innerHTML = "<span class='error'>User already exists!</span>"; return; }
-  
-  db.push({u, p});
-  localStorage.setItem('null_x_users', JSON.stringify(db));
-  msg.innerHTML = "<span class='success'>Registered! Now click Login.</span>";
-}
+    const sidebar = document.getElementById('memberSidebar');
+    const floatingBtn = document.getElementById('floatingSidebarBtn');
+    const collapseBtn = document.getElementById('sidebarCollapseBtn');
+    const smallCard = document.getElementById('smallSigninCard');
+    const mainContent = document.getElementById('everything-else');
 
-function doLogin() {
-  const u = document.getElementById('logUser').value.trim();
-  const p = document.getElementById('logPass').value;
-  const found = db.find(user => user.u === u && user.p === p);
-  
-  if(found) {
-    document.getElementById('userDisplay').innerText = u;
-    document.getElementById('authContainer').classList.add('hidden');
-    document.getElementById('accountArea').classList.remove('hidden');
-  } else {
-    document.getElementById('authMsg').innerHTML = "<span class='error'>Invalid username or password.</span>";
-  }
-}
+    function toggleSidebar() {
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('with-sidebar');
 
-function doLogout() {
-  document.getElementById('authContainer').classList.remove('hidden');
-  document.getElementById('accountArea').classList.add('hidden');
-  document.getElementById('logUser').value = '';
-  document.getElementById('logPass').value = '';
-}
-</script>
+      if (sidebar.classList.contains('collapsed')) {
+        collapseBtn.textContent = '→';
+        floatingBtn.style.display = 'flex';
+      } else {
+        collapseBtn.textContent = '←';
+        floatingBtn.style.display = 'none';
+      }
+    }
+
+    collapseBtn.addEventListener('click', toggleSidebar);
+    floatingBtn.addEventListener('click', toggleSidebar);
+
+    smallCard.addEventListener('click', () => {
+      alert("Sign In / Account panel would open here.");
+    });
+
+    function doLogin() {
+      const u = document.getElementById('logUser') ? document.getElementById('logUser').value.trim() : '';
+      const p = document.getElementById('logPass') ? document.getElementById('logPass').value : '';
+      const found = db.find(user => user.u === u && user.p === p);
+
+      if (found) {
+        isSignedIn = true;
+        sidebar.style.display = 'block';
+        smallCard.style.background = '#2ecc71';
+        smallCard.innerHTML = `Account<br><small>(${u})</small>`;
+        alert("Logged in! Sidebar should appear on the left.");
+      } else {
+        alert("Invalid username or password.");
+      }
+    }
+
+    function doLogout() {
+      isSignedIn = false;
+      sidebar.style.display = 'none';
+      smallCard.style.background = '#3498db';
+      smallCard.innerHTML = 'Sign In / Account';
+      alert("Logged out.");
+    }
+
+    // Old functions (safe fallback)
+    function switchAuthTab(type) { console.log("Old auth tab called"); }
+    function doSignup() { alert("Use the small card in bottom right for now."); }
+  </script>
 </body>
 
 </html>
