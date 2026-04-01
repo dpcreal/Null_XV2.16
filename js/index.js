@@ -742,10 +742,10 @@ function randomGame() {
 
 const preferencesDefaults = {
     cloak: true,
-    cloakUrl: 'https://classroom.google.com',
+    cloakUrl: 'https://glaxyias.github.io/Null-X/',
     mask: true,
-    maskTitle: 'Home',
-    maskIconUrl: 'https://ssl.gstatic.com/classroom/ic_product_classroom_32.png',
+    maskTitle: 'Null_X',
+    maskIconUrl: 'imgs/NX.png',
     background: true,
 };
 
