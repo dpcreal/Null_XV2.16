@@ -448,7 +448,7 @@ function toggleStar(event, star) {
           iframe.style.height = '100%';
           iframe.style.margin = '0';
           iframe.referrerpolicy = 'no-referrer';
-          iframe.allow = 'fullscreen';
+          iframe.allow = 'fullscreen; pointer-lock';
           iframe.src = url.toString();
           win.document.body.appendChild(iframe);
           window.location.replace(replaceUrl);
