@@ -857,7 +857,7 @@ const presets = {
         title: 'Nearpod',
         icon: 'https://nearpod.com/favicon.ico',
     },
-
+};
 
 function setPreset(object) {
     preferences.cloakUrl = object.url;
