@@ -216,65 +216,90 @@
             and CTRL+W cannot be overriden manually. </p>
         </div>
         <div class="setting">
-          <!--thers prolly a more efficent way to do this but this is what i have rn-->
-          <div id="keybind-1">
-            <h5>Slot 1</h5>
-            <p>Press a button then press a key on your keyboard to choose</p>
-            <button class="keySlot 1">Set Key</button>
-            <p style="display: inline;">+</p>
-            <button class="keySlot 2">Set Key</button>
-            <p style="display: inline;">+</p>
-            <button class="keySlot 3">Set Key (Optional)</button>
-            <p style="display: inline;">=</p>
-            <select class="slot-action">
-              <option value="makecloak()">Cloak</option>
-              <option value="mask()">Mask</option>
-              <option value="returnHome()">Return to Home</option>
-              <option value="mute()">Mute</option>
-              <option value="#">Pop-up Tab</option>
-              <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
-              <option value="#">Select an option ▼</option>
-            </select>
-          </div>
-          <div id="keybind-2">
-            <h5>Slot 2</h5>
-            <p>Press a button then press a key on your keyboard to choose</p>
-            <button class="keySlot 1">Set Key</button>
-            <p style="display: inline;">+</p>
-            <button class="keySlot 2">Set Key</button>
-            <p style="display: inline;">+</p>
-            <button class="keySlot 3">Set Key (Optional)</button>
-            <p style="display: inline;">=</p>
-            <select class="slot-action">
-              <option value="makecloak()">Cloak</option>
-              <option value="mask()">Mask</option>
-              <option value="returnHome()">Return to Home</option>
-              <option value="mute()">Mute</option>
-              <option value="#">Pop-up Tab</option>
-              <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
-              <option value="#">Select an option ▼</option>
-            </select>
-          </div>
-          <div id="keybind-3">
-            <h5>Slot 3</h5>
-            <p>Press a button then press a key on your keyboard to choose</p>
-            <button class="keySlot 1">Set Key</button>
-            <p style="display: inline;">+</p>
-            <button class="keySlot 2">Set Key</button>
-            <p style="display: inline;">+</p>
-            <button class="keySlot 3">Set Key (Optional)</button>
-            <p style="display: inline;">=</p>
-            <select class="slot-action">
-              <option value="makecloak()">Cloak</option>
-              <option value="mask()">Mask</option>
-              <option value="returnHome()">Return to Home</option>
-              <option value="mute()">Mute</option>
-              <option value="#">Pop-up Tab</option>
-              <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
-              <option value="#">Select an option ▼</option>
-            </select>
-          </div>
-        </div>
+  <h5>Shortcuts</h5>
+  <p>Shortcuts will help some people navigate the site easier. DISCLAIMER!! Certain shortcuts such as CTRL+R and CTRL+W cannot be overriden manually.</p>
+
+  <!-- Slot 1 -->
+  <div id="keybind-1">
+    <h5>Slot 1</h5>
+    <p>Press a button then press a key on your keyboard to choose</p>
+    <button class="keySlot 1">Set Key</button>
+    <p style="display: inline;">+</p>
+    <button class="keySlot 2">Set Key</button>
+    <p style="display: inline;">+</p>
+    <button class="keySlot 3">Set Key (Optional)</button>
+    <p style="display: inline;">=</p>
+    <select class="slot-action">
+      <option value="makecloak()">Cloak</option>
+      <option value="mask()">Mask</option>
+      <option value="returnHome()">Return to Home</option>
+      <option value="mute()">Mute</option>
+      <option value="panicKey()">Panic Key</option>
+      <option value="#">Pop-up Tab</option>
+      <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
+      <option value="#" selected>Select an option ▼</option>
+    </select>
+    <div class="panic-config" style="display:none; margin-top:8px;">
+      <small>Panic Link:</small><br>
+      <input type="text" class="panic-url-input" placeholder="https://classroom.google.com" style="width:70%;">
+      <button class="submit-button save-panic">Save Panic Link</button>
+    </div>
+  </div>
+
+  <!-- Slot 2 -->
+  <div id="keybind-2">
+    <h5>Slot 2</h5>
+    <p>Press a button then press a key on your keyboard to choose</p>
+    <button class="keySlot 1">Set Key</button>
+    <p style="display: inline;">+</p>
+    <button class="keySlot 2">Set Key</button>
+    <p style="display: inline;">+</p>
+    <button class="keySlot 3">Set Key (Optional)</button>
+    <p style="display: inline;">=</p>
+    <select class="slot-action">
+      <option value="makecloak()">Cloak</option>
+      <option value="mask()">Mask</option>
+      <option value="returnHome()">Return to Home</option>
+      <option value="mute()">Mute</option>
+      <option value="panicKey()"> Panic Key</option>
+      <option value="#">Pop-up Tab</option>
+      <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
+      <option value="#" selected>Select an option ▼</option>
+    </select>
+    <div class="panic-config" style="display:none; margin-top:8px;">
+      <small>Panic Link:</small><br>
+      <input type="text" class="panic-url-input" placeholder="https://classroom.google.com" style="width:70%;">
+      <button class="submit-button save-panic">Save Panic Link</button>
+    </div>
+  </div>
+
+  <!-- Slot 3 -->
+  <div id="keybind-3">
+    <h5>Slot 3</h5>
+    <p>Press a button then press a key on your keyboard to choose</p>
+    <button class="keySlot 1">Set Key</button>
+    <p style="display: inline;">+</p>
+    <button class="keySlot 2">Set Key</button>
+    <p style="display: inline;">+</p>
+    <button class="keySlot 3">Set Key (Optional)</button>
+    <p style="display: inline;">=</p>
+    <select class="slot-action">
+      <option value="makecloak()">Cloak</option>
+      <option value="mask()">Mask</option>
+      <option value="returnHome()">Return to Home</option>
+      <option value="mute()">Mute</option>
+      <option value="panicKey()">Panic Key</option>
+      <option value="#">Pop-up Tab</option>
+      <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
+      <option value="#" selected>Select an option ▼</option>
+    </select>
+    <div class="panic-config" style="display:none; margin-top:8px;">
+      <small>Panic Link:</small><br>
+      <input type="text" class="panic-url-input" placeholder="https://classroom.google.com" style="width:70%;">
+      <button class="submit-button save-panic">Save Panic Link</button>
+    </div>
+  </div>
+</div>
         <div class="setting">
           <h5>Background</h5>
           <p>Background can cause a lot of lag. Disable If Your Computer Has Lower FPS.</p>
