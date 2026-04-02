@@ -646,27 +646,30 @@ function onKeyRelease(event) {
 
 function onKeyPress(event) {
     var key = event.key.toLowerCase();
-    pressedKeys[key] = true
+    pressedKeys[key] = true;
+
     for (var slot in keyConfig) {
-      if (keyConfig.hasOwnProperty(slot)) {
-        // Check if the slot has configurations for key-1, key-2, and action
-        if (
-          keyConfig[slot]["keySlot-1"] &&
-          keyConfig[slot]["keySlot-1"] &&
-          keyConfig[slot]["slot-action"]
-        ) {
-          // Check if the pressed keys match the configured keys
-          var keyPressed = event.key.toLowerCase();
-          var key1Config = keyConfig[slot]["keySlot-1"].toLowerCase();
-          var key2Config = keyConfig[slot]["keySlot-2"].toLowerCase();
-          var key3Config = (keyConfig[slot]["keySlot-3"] || "").toLowerCase(); //  case where key-3 might not exist
-          if (pressedKeys[key1Config] && pressedKeys[key2Config] && ((key3Config) ? pressedKeys[key3Config] : true)) {
-            eval(keyConfig[slot]["slot-action"]);
-          }
+        if (keyConfig.hasOwnProperty(slot)) {
+            // Check if the slot has the required keys and an action
+            if (
+                keyConfig[slot]["keySlot-1"] &&
+                keyConfig[slot]["keySlot-2"] &&   // Fixed: was duplicated
+                keyConfig[slot]["slot-action"]
+            ) {
+                var key1Config = keyConfig[slot]["keySlot-1"].toLowerCase();
+                var key2Config = keyConfig[slot]["keySlot-2"].toLowerCase();
+                var key3Config = (keyConfig[slot]["keySlot-3"] || "").toLowerCase();
+
+                // Trigger if the exact combination is pressed
+                if (pressedKeys[key1Config] && pressedKeys[key2Config] && 
+                    (key3Config === "" || pressedKeys[key3Config])) {
+                    
+                    eval(keyConfig[slot]["slot-action"]);
+                }
+            }
         }
-      }
     }
-  }
+}
 
 document.addEventListener('keydown', onKeyPress);
 document.addEventListener('keyup', onKeyRelease);
@@ -956,3 +959,76 @@ document.getElementById('upload').addEventListener('click', function () {
 if (preferences.mask) {
     mask();
 }
+// ====================== PANIC KEY SYSTEM ======================
+
+// Panic function - called when the shortcut is pressed
+function panicKey() {
+    const savedUrl = localStorage.getItem('panicUrl') || 'https://classroom.google.com';
+
+    // Show a quick red notification
+    const notif = document.createElement('div');
+    notif.textContent = '🚨 PANIC ACTIVATED – Redirecting to safe page...';
+    notif.style.cssText = `
+        position: fixed; 
+        top: 20px; 
+        right: 20px; 
+        background: #c0392b; 
+        color: white; 
+        padding: 14px 22px; 
+        border-radius: 8px; 
+        z-index: 999999; 
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    `;
+    document.body.appendChild(notif);
+
+    // Redirect after a tiny delay so the notification is visible
+    setTimeout(() => {
+        window.location.replace(savedUrl);   // Fast redirect, doesn't add to history
+    }, 400);
+}
+
+// Show/hide the panic URL input when "Panic Key" is selected
+document.querySelectorAll('.slot-action').forEach(select => {
+    select.addEventListener('change', function () {
+        const configDiv = this.parentElement.querySelector('.panic-config');
+        if (configDiv) {
+            configDiv.style.display = (this.value === 'panicKey()') ? 'block' : 'none';
+        }
+    });
+});
+
+// Save panic URL when "Save Link" button is clicked
+document.querySelectorAll('.save-panic').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const input = this.parentElement.querySelector('.panic-url-input');
+        const url = input.value.trim();
+
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            localStorage.setItem('panicUrl', url);
+
+            const success = document.createElement('div');
+            success.textContent = '✅ Panic link saved successfully!';
+            success.style.cssText = `
+                position: fixed; top: 20px; right: 20px; 
+                background: #27ae60; color: white; 
+                padding: 12px 20px; border-radius: 6px; 
+                z-index: 999999;
+            `;
+            document.body.appendChild(success);
+            setTimeout(() => success.remove(), 2800);
+        } else {
+            alert('Please enter a valid URL starting with http:// or https://');
+        }
+    });
+});
+
+// Load saved panic URL into all input fields when page loads
+window.addEventListener('load', () => {
+    const savedUrl = localStorage.getItem('panicUrl');
+    if (savedUrl) {
+        document.querySelectorAll('.panic-url-input').forEach(input => {
+            input.value = savedUrl;
+        });
+    }
+});
