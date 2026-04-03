@@ -205,6 +205,11 @@
             "aliases": [],
             "categories": []
         },
+        "Car Race":{
+            "path": "car race",
+            "aliases": [],
+            "categories": []
+        },
         "Cat Ninja": {
             "path": "flash/?game=cat-ninja",
             "aliases": [],
