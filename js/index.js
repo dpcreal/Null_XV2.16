@@ -1032,3 +1032,23 @@ window.addEventListener('load', () => {
         });
     }
 });
+// ====================== CAR RACE PASSWORD LOCK ======================
+$('#gamesList').on('click', 'li', function () {
+    const gameName = $(this).text().trim().toLowerCase();
+
+    if (gameName.includes('car race') || gameName.includes('carrace')) {
+        showCarRacePassword();
+        return;   // Do NOT load the game yet
+    }
+
+    // Normal loading for all other games
+    const url = $(this).attr('url');
+    if (url) {
+        inGame = true;
+        $('#everything-else').fadeOut();
+        $('#page-loader').fadeIn();
+        $('#page-loader iframe').attr('src', url);
+        $('#page-loader iframe')[0].focus();
+        currentMenu = $('#page-loader');
+    }
+});
