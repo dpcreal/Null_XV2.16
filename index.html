@@ -416,7 +416,7 @@
   <script src="js/bg.js" defer></script>
   <script src="js/index.js" defer></script>
   
-   <script>
+     <script>
     // Local Database logic
     let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
     const sidebar = document.getElementById('memberSidebar');
@@ -465,23 +465,24 @@
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
 
-    /
-    const carRaceEncodedPass = "31323231";
+    // ====================== CAR RACE LOCK ======================
+    // This is the hidden password (1221) stored in a way that's harder to spot
+    const _0x4f2a = "31323231";
 
-    function hexToText(hex) {
-      let result = '';
+    function _0x3d9b(hex) {
+      let str = '';
       for (let i = 0; i < hex.length; i += 2) {
-        result += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
       }
-      return result;
+      return str;
     }
 
     function checkCarPassword() {
-      const userInput = document.getElementById('carPassInput').value.trim();
-      const realPass = hexToText(carRaceEncodedPass);
+      const input = document.getElementById('carPassInput').value.trim();
+      const realPass = _0x3d9b(_0x4f2a);
       const errorMsg = document.getElementById('carErrorMsg');
 
-      if (userInput === realPass) {
+      if (input === realPass) {
         document.getElementById('carRaceOverlay').style.display = 'none';
         loadCarRaceProxy();
       } else {
@@ -497,7 +498,7 @@
     }
 
     function loadCarRaceProxy() {
-      // TODO: Change this to your actual Car Race proxy URL
+      // Change this to your real Car Race proxy URL
       document.getElementById('everything-else').style.display = 'none';
       document.getElementById('page-loader').style.display = 'block';
       document.getElementById('proxyFrame').src = "https://YOUR-CAR-RACE-PROXY-URL-HERE"; 
@@ -512,7 +513,7 @@
         });
       }
     });
-   
+    // ====================== END CAR RACE LOCK ======================
   </script>
 </body>
 </html>
