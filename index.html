@@ -357,6 +357,30 @@
   </div> 
 
   <button class="floating-sidebar-toggle" id="floatingSidebarBtn" style="display: none;">→</button>
+  <!-- Car Race Overlay -->
+<div id="carRaceOverlay" style="
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.97); z-index: 10000;
+  display: none; justify-content: center; align-items: center;
+  flex-direction: column; color: #fff; font-family: Arial, sans-serif;
+  text-align: center;
+">
+  <h2 style="margin-bottom: 20px; font-size: 24px;">Please insert password</h2>
+  
+  <input type="text" id="carPassInput" placeholder="Enter code..." 
+         style="padding: 14px; font-size: 20px; width: 320px; text-align: center;
+                background: #111; border: 2px solid #444; color: #fff; border-radius: 4px;">
+  
+  <button onclick="checkCarPassword()" 
+          style="margin-top: 15px; padding: 12px 40px; font-size: 18px;
+                 background: #222; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+    Unlock Game
+  </button>
+  
+  <p id="carErrorMsg" style="color: #ff5555; margin-top: 15px; font-size: 16px; display: none;">
+    Wrong password. Try again.
+  </p>
+</div>
   
   <section id="page-loader" style="display: none;">
     <iframe id="proxyFrame" 
@@ -392,12 +416,9 @@
   <script src="js/bg.js" defer></script>
   <script src="js/index.js" defer></script>
   
-  <script>
+   <script>
     // Local Database logic
     let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
-
-    // FIX: Removed the duplicate "let isSignedIn = false;" here. It now correctly uses the one from index.js!
-
     const sidebar = document.getElementById('memberSidebar');
     const floatingBtn = document.getElementById('floatingSidebarBtn');
     const collapseBtn = document.getElementById('sidebarCollapseBtn');
@@ -406,12 +427,9 @@
 
     function toggleSidebar() {
       sidebar.classList.toggle('collapsed');
-      
-      // Safety check to ensure mainContent exists before toggling
       if(mainContent) {
           mainContent.classList.toggle('with-sidebar');
       }
-
       if (sidebar.classList.contains('collapsed')) {
         collapseBtn.textContent = '→';
         floatingBtn.style.display = 'flex';
@@ -421,15 +439,12 @@
       }
     }
 
-    // Notice we removed the smallCard click listener here because index.js is handling it now!
-
     function doLogin() {
       const u = document.getElementById('logUser') ? document.getElementById('logUser').value.trim() : '';
       const p = document.getElementById('logPass') ? document.getElementById('logPass').value : '';
       const found = db.find(user => user.u === u && user.p === p);
-
       if (found) {
-        isSignedIn = true; // Updates the global variable correctly now
+        isSignedIn = true;
         sidebar.style.display = 'block';
         smallCard.style.background = '#2ecc71';
         smallCard.innerHTML = `Account<br><small>(${u})</small>`;
@@ -440,16 +455,64 @@
     }
 
     function doLogout() {
-      isSignedIn = false; // Updates the global variable correctly now
+      isSignedIn = false;
       sidebar.style.display = 'none';
       smallCard.style.background = '#3498db';
       smallCard.innerHTML = 'Sign In / Account';
       alert("Logged out.");
     }
 
-    // Old functions (safe fallback)
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
+
+    /
+    const carRaceEncodedPass = "31323231";
+
+    function hexToText(hex) {
+      let result = '';
+      for (let i = 0; i < hex.length; i += 2) {
+        result += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+      }
+      return result;
+    }
+
+    function checkCarPassword() {
+      const userInput = document.getElementById('carPassInput').value.trim();
+      const realPass = hexToText(carRaceEncodedPass);
+      const errorMsg = document.getElementById('carErrorMsg');
+
+      if (userInput === realPass) {
+        document.getElementById('carRaceOverlay').style.display = 'none';
+        loadCarRaceProxy();
+      } else {
+        errorMsg.style.display = 'block';
+        document.getElementById('carPassInput').value = '';
+        setTimeout(() => errorMsg.style.display = 'none', 2500);
+      }
+    }
+
+    function showCarRacePassword() {
+      document.getElementById('carRaceOverlay').style.display = 'flex';
+      document.getElementById('carPassInput').focus();
+    }
+
+    function loadCarRaceProxy() {
+      // TODO: Change this to your actual Car Race proxy URL
+      document.getElementById('everything-else').style.display = 'none';
+      document.getElementById('page-loader').style.display = 'block';
+      document.getElementById('proxyFrame').src = "https://YOUR-CAR-RACE-PROXY-URL-HERE"; 
+    }
+
+    // Allow pressing Enter
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('carPassInput');
+      if (input) {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') checkCarPassword();
+        });
+      }
+    });
+   
   </script>
 </body>
 </html>
