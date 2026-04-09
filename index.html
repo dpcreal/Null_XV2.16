@@ -343,9 +343,6 @@
     <div class="small-signin-card" id="smallSigninCard">
       Sign In / Account
     </div>
-  <div class="small-signin-card" id="smallSigninCard">
-      Sign In / Account
-    </div>
   </section> <div class="member-sidebar" id="memberSidebar" style="display: none;">
     <div class="sidebar-header">
       <h3>Member Features</h3>
@@ -407,6 +404,61 @@
         </path>
       </svg>
     </button>
+    <!-- SIGN IN POP-UP MODAL -->
+<dialog id="signinModal">
+  <div class="modal-content">
+    <!-- Red X to close -->
+    <button id="closeModalBtn" class="close-btn">✕</button>
+
+    <h1 class="glow">Null_X</h1>
+    <p class="subtitle">Sign in for brand new features</p>
+
+    <div class="tabs">
+      <div class="tab active" id="modalSignupTab">Create Account</div>
+      <div class="tab" id="modalLoginTab">Login</div>
+    </div>
+
+    <!-- Create Account Form -->
+    <div id="modalSignupForm">
+      <div class="form-group">
+        <label>Your Email</label>
+        <input type="email" id="modalSignupEmail" placeholder="yourname@gmail.com">
+        <div id="modalEmailFeedback" class="feedback"></div>
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="modalSignupUsername" placeholder="Choose a username">
+        <div id="modalUsernameFeedback" class="feedback"></div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-container">
+          <input type="password" id="modalSignupPassword" placeholder="At least 8 characters">
+          <span class="toggle-password" id="toggleModalSignupPassword">👁️</span>
+        </div>
+      </div>
+      <div id="modalSignupMessage" class="feedback"></div>
+      <button onclick="handleModalSignup()">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="modalLoginForm" class="hidden">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="modalLoginUsername" placeholder="Your username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-container">
+          <input type="password" id="modalLoginPassword" placeholder="Your password">
+          <span class="toggle-password" id="toggleModalLoginPassword">👁️</span>
+        </div>
+      </div>
+      <div id="modalLoginMessage" class="feedback"></div>
+      <button onclick="handleModalLogin()">Login</button>
+    </div>
+  </div>
+</dialog>
   </section>
 
   <script src="js/config.js"></script>
@@ -417,6 +469,7 @@
   <script src="js/index.js" defer></script>
   
      <script>
+// ====================== YOUR ORIGINAL CODE (KEPT UNCHANGED) ======================
     // Local Database logic
     let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
     const sidebar = document.getElementById('memberSidebar');
@@ -465,10 +518,8 @@
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
 
-    // ====================== CAR RACE LOCK ======================
-    // This is the hidden password (1221) stored in a way that's harder to spot
+    // ====================== CAR RACE LOCK (KEPT UNCHANGED) ======================
     const _0x4f2a = "31323231";
-
     function _0x3d9b(hex) {
       let str = '';
       for (let i = 0; i < hex.length; i += 2) {
@@ -476,12 +527,10 @@
       }
       return str;
     }
-
     function checkCarPassword() {
       const input = document.getElementById('carPassInput').value.trim();
       const realPass = _0x3d9b(_0x4f2a);
       const errorMsg = document.getElementById('carErrorMsg');
-
       if (input === realPass) {
         document.getElementById('carRaceOverlay').style.display = 'none';
         loadCarRaceProxy();
@@ -491,20 +540,17 @@
         setTimeout(() => errorMsg.style.display = 'none', 2500);
       }
     }
-
     function showCarRacePassword() {
       document.getElementById('carRaceOverlay').style.display = 'flex';
       document.getElementById('carPassInput').focus();
     }
-
     function loadCarRaceProxy() {
-      // Change this to your real Car Race proxy URL
       document.getElementById('everything-else').style.display = 'none';
       document.getElementById('page-loader').style.display = 'block';
-      document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/"; 
+      document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/";
     }
 
-    // Allow pressing Enter
+    // Allow pressing Enter in car race password
     document.addEventListener('DOMContentLoaded', () => {
       const input = document.getElementById('carPassInput');
       if (input) {
@@ -513,7 +559,162 @@
         });
       }
     });
-    // ====================== END CAR RACE LOCK ======================
-  </script>
+
+// ====================== NEW SECURE MODAL SIGN-IN (ADDED) ======================
+// Secure password hashing + remember login
+async function hashPassword(password, salt) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const hash = await crypto.subtle.deriveBits({
+    name: "PBKDF2",
+    salt: encoder.encode(salt),
+    iterations: 600000,
+    hash: "SHA-256"
+  }, key, 256);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function generateSalt() {
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// Load users for the new system
+let users = JSON.parse(localStorage.getItem('null_x_users')) || [];
+let currentUser = JSON.parse(localStorage.getItem('null_x_current_user')) || null;
+
+function saveUsers() {
+  localStorage.setItem('null_x_users', JSON.stringify(users));
+}
+
+// Modal controls
+const signinModal = document.getElementById('signinModal');
+
+function openModal() {
+  signinModal.showModal();
+}
+
+function closeModal() {
+  signinModal.close();
+}
+
+// Open modal when clicking the small sign-in card
+if (smallCard) {
+  smallCard.style.cursor = "pointer";
+  smallCard.addEventListener("click", openModal);
+}
+
+// Red X close button
+document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+
+// Click outside to close
+signinModal.addEventListener("click", (e) => {
+  if (e.target === signinModal) closeModal();
+});
+
+// Tab switching
+document.getElementById("modalSignupTab").addEventListener("click", () => {
+  document.getElementById("modalSignupForm").classList.remove("hidden");
+  document.getElementById("modalLoginForm").classList.add("hidden");
+  document.getElementById("modalSignupTab").classList.add("active");
+  document.getElementById("modalLoginTab").classList.remove("active");
+});
+
+document.getElementById("modalLoginTab").addEventListener("click", () => {
+  document.getElementById("modalSignupForm").classList.add("hidden");
+  document.getElementById("modalLoginForm").classList.remove("hidden");
+  document.getElementById("modalSignupTab").classList.remove("active");
+  document.getElementById("modalLoginTab").classList.add("active");
+});
+
+// Password visibility toggles
+const toggles = [
+  { inputId: "modalSignupPassword", toggleId: "toggleModalSignupPassword" },
+  { inputId: "modalLoginPassword", toggleId: "toggleModalLoginPassword" }
+];
+toggles.forEach(({inputId, toggleId}) => {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      input.type = input.type === "password" ? "text" : "password";
+    });
+  }
+});
+
+// Create Account
+async function handleModalSignup() {
+  const email = document.getElementById("modalSignupEmail").value.trim();
+  const username = document.getElementById("modalSignupUsername").value.trim();
+  const password = document.getElementById("modalSignupPassword").value;
+  const msg = document.getElementById("modalSignupMessage");
+
+  if (!email || !username || password.length < 8) {
+    msg.innerHTML = '<span style="color:#ff6b6b">Please fill all fields. Password must be at least 8 characters.</span>';
+    return;
+  }
+
+  if (users.some(u => u.username === username || u.email === email)) {
+    msg.innerHTML = '<span style="color:#ff6b6b">Username or email already taken.</span>';
+    return;
+  }
+
+  const salt = generateSalt();
+  const hashed = await hashPassword(password, salt);
+
+  users.push({ email, username, salt, hashedPassword: hashed });
+  saveUsers();
+
+  msg.innerHTML = '<span style="color:#4ade80">Account created! Switch to Login tab.</span>';
+
+  document.getElementById("modalSignupEmail").value = "";
+  document.getElementById("modalSignupUsername").value = "";
+  document.getElementById("modalSignupPassword").value = "";
+}
+
+// Login
+async function handleModalLogin() {
+  const username = document.getElementById("modalLoginUsername").value.trim();
+  const password = document.getElementById("modalLoginPassword").value;
+  const msg = document.getElementById("modalLoginMessage");
+
+  const user = users.find(u => u.username === username);
+  if (!user) {
+    msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
+    return;
+  }
+
+  const hashedInput = await hashPassword(password, user.salt);
+
+  if (hashedInput === user.hashedPassword) {
+    currentUser = { username: user.username };
+    localStorage.setItem('null_x_current_user', JSON.stringify(currentUser));
+
+    msg.innerHTML = `<span style="color:#4ade80">Welcome, ${username}!</span>`;
+    closeModal();
+
+    // Update the small card + show sidebar
+    smallCard.style.background = "#2ecc71";
+    smallCard.innerHTML = `Account<br><small>(${username})</small>`;
+    document.getElementById("memberSidebar").style.display = "block";
+
+    alert(`Successfully logged in as ${username}!`);
+  } else {
+    msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
+  }
+}
+
+// Remember you after refresh
+window.addEventListener("load", () => {
+  currentUser = JSON.parse(localStorage.getItem('null_x_current_user')) || null;
+  if (currentUser) {
+    smallCard.style.background = "#2ecc71";
+    smallCard.innerHTML = `Account<br><small>(${currentUser.username})</small>`;
+    document.getElementById("memberSidebar").style.display = "block";
+  }
+});
+// ====================== END NEW SIGN-IN SYSTEM ======================
+</script>
 </body>
 </html>
