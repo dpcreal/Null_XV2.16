@@ -518,8 +518,8 @@
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
 
-// ====================== IMPROVED CAR RACE LOCK (HEX PASSWORD) ======================
-const _0x4f2a = "796f757253656372657450617373776f726448657265";   // ← CHANGE THIS if you want a different password
+// ====================== IMPROVED CAR RACE LOCK ======================
+const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b4c";
 
 function _0x3d9b(hex) {
     let str = '';
@@ -618,7 +618,7 @@ function checkCarPassword() {
             saveCarLockState();
         } else {
             msg.style.color = '#ff5555';
-            msg.textContent = `❌ Wrong password. ${ATTEMPTS_PER_LEVEL - carFailedAttempts} attempts left.`;
+            msg.textContent = `Wrong password. ${ATTEMPTS_PER_LEVEL - carFailedAttempts} attempts left.`;
         }
     }
 }
@@ -629,7 +629,7 @@ function showCarRacePassword() {
     
     const input = document.getElementById('carPassInput');
     if (input) {
-        input.value = '';      // Clear password every time we show the lock
+        input.value = '';      // Clear password every time.
         input.focus();
     }
     
