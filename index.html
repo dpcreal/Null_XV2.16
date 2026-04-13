@@ -409,29 +409,54 @@
   </div> 
 
   <button class="floating-sidebar-toggle" id="floatingSidebarBtn" style="display: none;">→</button>
-  <!-- ====================CAR RACE LOCK ==================== -->
+  <!-- ==================== IMPROVED CAR RACE LOCK ==================== -->
 <div id="carRaceOverlay" style="
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0, 0, 0, 0.98); z-index: 10000;
   display: none; justify-content: center; align-items: center;
   flex-direction: column; color: #fff; font-family: Arial, sans-serif;
-  text-align: center;">
-  
-  <h2 style="margin-bottom: 20px; font-size: 26px;">Car Race Locked</h2>
-  <p style="margin-bottom: 25px;">Enter the password correctly to access</p>
+  text-align: center; position: relative;">
 
-  <input type="text" id="carPassInput" placeholder="Enter password here"
+  <h2 style="margin-bottom: 20px; font-size: 26px;">Car Race Locked</h2>
+  <p style="margin-bottom: 25px;">Enter the password to start racing</p>
+
+  <input type="password" id="carPassInput" placeholder="Enter password..."
          style="padding: 14px; font-size: 20px; width: 340px; text-align: center;
                 background: #111; border: 2px solid #555; color: #fff; border-radius: 6px;"
          autocomplete="new-password" autocorrect="off" spellcheck="false">
 
-  <button onclick="checkCarPassword()" 
+  <button onclick="checkCarPassword()"
           style="margin-top: 20px; padding: 14px 50px; font-size: 18px;
                  background: #0a0; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
     Unlock Game
   </button>
 
   <div id="carErrorMsg" style="margin-top: 20px; font-size: 17px; min-height: 26px;"></div>
+
+  <!-- Secret reset box - very small and hidden in bottom left -->
+  <div id="secretResetBox" style="
+    position: absolute; bottom: 12px; left: 12px; 
+    width: 18px; height: 18px; background: rgba(255,255,255,0.03); 
+    cursor: pointer; border-radius: 2px;" 
+    onclick="showSecretUnlock()"></div>
+</div>
+
+<!-- Secret hex unlock popup -->
+<div id="secretUnlockPopup" style="
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: #111; border: 2px solid #555; padding: 20px; border-radius: 8px;
+  color: #fff; display: none; flex-direction: column; align-items: center; z-index: 10001;">
+  
+  <p style="margin: 0 0 15px 0;">Unlock?</p>
+  <input type="password" id="secretHexInput" placeholder="Enter hex code..."
+         style="padding: 10px; width: 280px; background: #222; border: 1px solid #666; color: #fff; margin-bottom: 10px;">
+  
+  <button onclick="checkSecretHex()" 
+          style="padding: 8px 25px; background: #0a0; color: #fff; border: none; border-radius: 4px;">
+    Submit
+  </button>
+  
+  <div id="secretMsg" style="margin-top: 10px; font-size: 14px; min-height: 20px;"></div>
 </div>
   
   <section id="page-loader" style="display: none;">
@@ -518,8 +543,8 @@
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
 
-// ====================== CAR RACE LOCK ======================
-const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b"; // Current password: carraceisaproxygoodluck
+// ======================  CAR RACE LOCK ======================
+const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b4c";
 
 function _0x3d9b(hex) {
     let str = '';
@@ -531,18 +556,19 @@ function _0x3d9b(hex) {
 
 const ATTEMPTS_PER_LEVEL = 3;
 const LOCK_DURATIONS = [
-    3 * 60 * 1000,                    // 3 minutes   (after first 3 fails)
-    10 * 60 * 1000,                   // 10 minutes
-    60 * 60 * 1000,                   // 1 hour
-    30 * 24 * 60 * 60 * 1000,         // ~1 month
-    365 * 24 * 60 * 60 * 1000,        // ~1 year
-    999999999 * 365 * 24 * 60 * 60 * 1000  // 999,999,999 years
+    3 * 60 * 1000,      // 3 min
+    10 * 60 * 1000,     // 10 min
+    60 * 60 * 1000,     // 1 hour
+    30 * 24 * 60 * 60 * 1000, // ~1 month
+    365 * 24 * 60 * 60 * 1000, // ~1 year
+    999999999 * 365 * 24 * 60 * 60 * 1000
 ];
 
 let carFailedAttempts = 0;
 let carCurrentLockLevel = 0;
 let carLockUntil = 0;
 let countdownInterval = null;
+let secretFailedAttempts = 0;
 
 function loadCarLockState() {
     const saved = localStorage.getItem('carRaceLockState');
@@ -569,12 +595,10 @@ function isCarLocked() {
 function getCarLockTimeLeft() {
     let seconds = Math.max(0, Math.ceil((carLockUntil - Date.now()) / 1000));
     if (seconds === 0) return "0 seconds";
-
     const h = Math.floor(seconds / 3600);
     seconds %= 3600;
     const m = Math.floor(seconds / 60);
     seconds %= 60;
-
     let parts = [];
     if (h > 0) parts.push(h + "h");
     if (m > 0) parts.push(m + "m");
@@ -585,7 +609,6 @@ function getCarLockTimeLeft() {
 function startCountdown() {
     if (countdownInterval) clearInterval(countdownInterval);
     const msg = document.getElementById('carErrorMsg');
-    
     countdownInterval = setInterval(() => {
         if (!isCarLocked()) {
             clearInterval(countdownInterval);
@@ -606,24 +629,14 @@ function disableInputWhileLocked() {
 
 function checkCarPassword() {
     if (isCarLocked()) return;
-
     const input = document.getElementById('carPassInput');
     const msg = document.getElementById('carErrorMsg');
     const realPass = _0x3d9b(_0x4f2a);
 
-    const entered = input.value.trim();
-
-    if (entered === realPass) {
+    if (input.value.trim() === realPass) {
         msg.style.color = '#0f0';
         msg.textContent = 'Correct! Loading game...';
-
-        localStorage.removeItem('carRaceLockState');
-        input.value = '';
-        carFailedAttempts = 0;
-        carCurrentLockLevel = 0;
-        carLockUntil = 0;
-        if (countdownInterval) clearInterval(countdownInterval);
-
+        resetAllLocks();
         setTimeout(() => {
             document.getElementById('carRaceOverlay').style.display = 'none';
             loadCarRaceProxy();
@@ -631,12 +644,10 @@ function checkCarPassword() {
     } else {
         input.value = '';
         carFailedAttempts++;
-
         if (carFailedAttempts >= ATTEMPTS_PER_LEVEL) {
             carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
             carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
             carFailedAttempts = 0;
-
             msg.style.color = '#ff5555';
             msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
             saveCarLockState();
@@ -647,6 +658,59 @@ function checkCarPassword() {
             msg.textContent = 'Wrong password. ' + (ATTEMPTS_PER_LEVEL - carFailedAttempts) + ' attempts left.';
         }
     }
+}
+
+function showSecretUnlock() {
+    if (!isCarLocked()) return;
+    document.getElementById('secretUnlockPopup').style.display = 'flex';
+    document.getElementById('secretHexInput').value = '';
+    document.getElementById('secretMsg').textContent = '';
+    secretFailedAttempts = 0;
+}
+
+function checkSecretHex() {
+    const input = document.getElementById('secretHexInput');
+    const msg = document.getElementById('secretMsg');
+    const entered = input.value.trim().toLowerCase();
+    const correctHex = _0x4f2a;   // the full hex string
+
+    if (entered === correctHex) {
+        msg.style.color = '#0f0';
+        msg.textContent = 'Correct. Timer reset.';
+        resetAllLocks();
+        setTimeout(() => {
+            document.getElementById('secretUnlockPopup').style.display = 'none';
+            document.getElementById('carRaceOverlay').style.display = 'none';
+            loadCarRaceProxy();
+        }, 800);
+    } else {
+        input.value = '';
+        secretFailedAttempts++;
+        if (secretFailedAttempts >= 3) {
+            msg.style.color = '#ff5555';
+            msg.textContent = 'Too many wrong attempts. Timer restarted at 3 minutes.';
+            document.getElementById('secretUnlockPopup').style.display = 'none';
+            // Restart main lock at level 0
+            carCurrentLockLevel = 0;
+            carLockUntil = Date.now() + LOCK_DURATIONS[0];
+            carFailedAttempts = 0;
+            saveCarLockState();
+            startCountdown();
+            disableInputWhileLocked();
+        } else {
+            msg.style.color = '#ff5555';
+            msg.textContent = 'Wrong hex. ' + (3 - secretFailedAttempts) + ' attempts left.';
+        }
+    }
+}
+
+function resetAllLocks() {
+    localStorage.removeItem('carRaceLockState');
+    carFailedAttempts = 0;
+    carCurrentLockLevel = 0;
+    carLockUntil = 0;
+    secretFailedAttempts = 0;
+    if (countdownInterval) clearInterval(countdownInterval);
 }
 
 function showCarRacePassword() {
@@ -662,7 +726,6 @@ function showCarRacePassword() {
     loadCarLockState();
     
     const msg = document.getElementById('carErrorMsg');
-    
     if (isCarLocked()) {
         msg.style.color = '#ffaa00';
         msg.innerHTML = 'Locked for ' + getCarLockTimeLeft() + '<br><small>Cannot type while locked</small>';
