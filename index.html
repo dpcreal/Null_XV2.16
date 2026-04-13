@@ -409,29 +409,29 @@
   </div> 
 
   <button class="floating-sidebar-toggle" id="floatingSidebarBtn" style="display: none;">→</button>
-  <!-- Car Race Overlay -->
+  <!-- ==================== IMPROVED CAR RACE LOCK ==================== -->
 <div id="carRaceOverlay" style="
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.97); z-index: 10000;
+  background: rgba(0, 0, 0, 0.98); z-index: 10000;
   display: none; justify-content: center; align-items: center;
   flex-direction: column; color: #fff; font-family: Arial, sans-serif;
-  text-align: center;
-">
-  <h2 style="margin-bottom: 20px; font-size: 24px;">Please insert password</h2>
+  text-align: center;">
   
-  <input type="text" id="carPassInput" placeholder="Enter code..." 
-         style="padding: 14px; font-size: 20px; width: 320px; text-align: center;
-                background: #111; border: 2px solid #444; color: #fff; border-radius: 4px;">
-  
+  <h2 style="margin-bottom: 20px; font-size: 26px;"> Car Race Locked</h2>
+  <p style="margin-bottom: 25px;">Enter the password to start racing</p>
+
+  <input type="text" id="carPassInput" placeholder="Enter password..."
+         style="padding: 14px; font-size: 20px; width: 340px; text-align: center;
+                background: #111; border: 2px solid #555; color: #fff; border-radius: 6px;"
+         autocomplete="new-password" autocorrect="off" spellcheck="false">
+
   <button onclick="checkCarPassword()" 
-          style="margin-top: 15px; padding: 12px 40px; font-size: 18px;
-                 background: #222; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+          style="margin-top: 20px; padding: 14px 50px; font-size: 18px;
+                 background: #0a0; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
     Unlock Game
   </button>
-  
-  <p id="carErrorMsg" style="color: #ff5555; margin-top: 15px; font-size: 16px; display: none;">
-    Wrong password. Try again.
-  </p>
+
+  <div id="carErrorMsg" style="margin-top: 20px; font-size: 17px; min-height: 26px;"></div>
 </div>
   
   <section id="page-loader" style="display: none;">
@@ -518,47 +518,143 @@
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
 
-    // ====================== CAR RACE LOCK ======================
-    const _0x4f2a = "31323231";
-    function _0x3d9b(hex) {
-      let str = '';
-      for (let i = 0; i < hex.length; i += 2) {
+// ====================== IMPROVED CAR RACE LOCK (HEX PASSWORD) ======================
+const _0x4f2a = "796f757253656372657450617373776f726448657265";   // ← CHANGE THIS if you want a different password
+
+function _0x3d9b(hex) {
+    let str = '';
+    for (let i = 0; i < hex.length; i += 2) {
         str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-      }
-      return str;
     }
-    function checkCarPassword() {
-      const input = document.getElementById('carPassInput').value.trim();
-      const realPass = _0x3d9b(_0x4f2a);
-      const errorMsg = document.getElementById('carErrorMsg');
-      if (input === realPass) {
-        document.getElementById('carRaceOverlay').style.display = 'none';
-        loadCarRaceProxy();
-      } else {
-        errorMsg.style.display = 'block';
-        document.getElementById('carPassInput').value = '';
-        setTimeout(() => errorMsg.style.display = 'none', 2500);
-      }
+    return str;
+}
+
+const ATTEMPTS_PER_LEVEL = 3;
+const LOCK_DURATIONS = [
+    3 * 60 * 1000,      // 3 min
+    10 * 60 * 1000,     // 10 min
+    60 * 60 * 1000,     // 1 hour
+    30 * 24 * 60 * 60 * 1000,   // ~1 month
+    999999999 * 365 * 24 * 60 * 60 * 1000
+];
+
+let carFailedAttempts = 0;
+let carCurrentLockLevel = 0;
+let carLockUntil = 0;
+
+function loadCarLockState() {
+    const saved = localStorage.getItem('carRaceLockState');
+    if (saved) {
+        const data = JSON.parse(saved);
+        carFailedAttempts = data.failed || 0;
+        carCurrentLockLevel = data.level || 0;
+        carLockUntil = data.until || 0;
     }
-    function showCarRacePassword() {
-      document.getElementById('carRaceOverlay').style.display = 'flex';
-      document.getElementById('carPassInput').focus();
-    }
-    function loadCarRaceProxy() {
-      document.getElementById('everything-else').style.display = 'none';
-      document.getElementById('page-loader').style.display = 'block';
-      document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/";
+}
+
+function saveCarLockState() {
+    localStorage.setItem('carRaceLockState', JSON.stringify({
+        failed: carFailedAttempts,
+        level: carCurrentLockLevel,
+        until: carLockUntil
+    }));
+}
+
+function isCarLocked() {
+    return Date.now() < carLockUntil;
+}
+
+function getCarLockTimeLeft() {
+    let seconds = Math.ceil((carLockUntil - Date.now()) / 1000);
+    if (seconds <= 0) return "0 seconds";
+    const h = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const m = Math.floor(seconds / 60);
+    seconds %= 60;
+    if (h > 0) return `${h}h ${m}m ${seconds}s`;
+    if (m > 0) return `${m}m ${seconds}s`;
+    return `${seconds}s`;
+}
+
+function checkCarPassword() {
+    const input = document.getElementById('carPassInput');
+    const msg = document.getElementById('carErrorMsg');
+    const realPass = _0x3d9b(_0x4f2a);
+
+    if (isCarLocked()) {
+        msg.style.color = '#ffaa00';
+        msg.innerHTML = `Locked for ${getCarLockTimeLeft()}`;
+        input.value = '';
+        return;
     }
 
-    // Allow pressing Enter in car race password
-    document.addEventListener('DOMContentLoaded', () => {
-      const input = document.getElementById('carPassInput');
-      if (input) {
-        input.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') checkCarPassword();
-        });
-      }
-    });
+    const entered = input.value.trim();
+
+    if (entered === realPass) {
+        msg.style.color = '#0f0';
+        msg.textContent = 'Correct! Loading game...';
+
+        localStorage.removeItem('carRaceLockState');
+        input.value = '';
+        carFailedAttempts = 0;
+        carCurrentLockLevel = 0;
+        carLockUntil = 0;
+
+        setTimeout(() => {
+            document.getElementById('carRaceOverlay').style.display = 'none';
+            loadCarRaceProxy();
+        }, 600);
+    } else {
+        input.value = '';
+        carFailedAttempts++;
+
+        if (carFailedAttempts >= ATTEMPTS_PER_LEVEL) {
+            carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
+            carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
+            carFailedAttempts = 0;
+
+            msg.style.color = '#ff5555';
+            msg.innerHTML = `Too many wrong attempts!<br>Locked for ${getCarLockTimeLeft()}`;
+            saveCarLockState();
+        } else {
+            msg.style.color = '#ff5555';
+            msg.textContent = `❌ Wrong password. ${ATTEMPTS_PER_LEVEL - carFailedAttempts} attempts left.`;
+        }
+    }
+}
+
+function showCarRacePassword() {
+    const overlay = document.getElementById('carRaceOverlay');
+    overlay.style.display = 'flex';
+    
+    const input = document.getElementById('carPassInput');
+    if (input) {
+        input.value = '';      // Clear password every time we show the lock
+        input.focus();
+    }
+    
+    loadCarLockState();
+    
+    const msg = document.getElementById('carErrorMsg');
+    if (isCarLocked()) {
+        msg.style.color = '#ffaa00';
+        msg.innerHTML = `Locked for ${getCarLockTimeLeft()}`;
+    } else {
+        msg.textContent = '';
+    }
+}
+
+function loadCarRaceProxy() {
+    document.getElementById('everything-else').style.display = 'none';
+    document.getElementById('page-loader').style.display = 'block';
+    document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/";
+}
+
+window.addEventListener('load', () => {
+    loadCarLockState();
+    const input = document.getElementById('carPassInput');
+    if (input) input.addEventListener('focus', () => input.value = '');
+});
 // ====================== NEW SECURE MODAL SIGN-IN ======================
 // Secure password hashing
 async function hashPassword(password, salt) {
@@ -730,6 +826,13 @@ window.addEventListener("load", () => {
     smallCard.innerHTML = `Account<br><small>(${currentUser.username})</small>`;
     document.getElementById("memberSidebar").style.display = "block";
   }
+});
+// Extra clear when user goes back to main page
+document.getElementById('carRaceOverlay').addEventListener('transitionend', () => {
+    if (document.getElementById('carRaceOverlay').style.display === 'none') {
+        const input = document.getElementById('carPassInput');
+        if (input) input.value = '';
+    }
 });
 </script>
 </body>
