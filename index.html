@@ -642,14 +642,20 @@ function checkCarPassword() {
         }, 600);
     } else {
         input.value = '';
-        carFailedAttempts++;
+        carFailedAttempts++; // Increment the failure
+        
+        // --- KEY CHANGE START ---
+        // Save the state IMMEDIATELY so refresh doesn't reset attempts
+        saveCarLockState(); 
+        // --- KEY CHANGE END ---
+
         if (carFailedAttempts >= ATTEMPTS_PER_LEVEL) {
             carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
             carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
             carFailedAttempts = 0;
             msg.style.color = '#ff5555';
             msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
-            saveCarLockState();
+            saveCarLockState(); // Save the new lock timing
             startCountdown();
             disableInputWhileLocked();
         } else {
