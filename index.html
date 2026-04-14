@@ -409,13 +409,13 @@
   </div> 
 
   <button class="floating-sidebar-toggle" id="floatingSidebarBtn" style="display: none;">→</button>
-  <!-- ==================== IMPROVED CAR RACE LOCK ==================== -->
+ <!-- ==================== IMPROVED CAR RACE LOCK ==================== -->
 <div id="carRaceOverlay" style="
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.98); z-index: 10000;
+  background: rgba(0, 0, 0, 0.98); z-index: 999999;
   display: none; justify-content: center; align-items: center;
   flex-direction: column; color: #fff; font-family: Arial, sans-serif;
-  text-align: center; position: relative;">
+  text-align: center; overflow: hidden;">
 
   <h2 style="margin-bottom: 20px; font-size: 26px;">Car Race Locked</h2>
   <p style="margin-bottom: 25px;">Enter the password to start racing</p>
@@ -433,19 +433,19 @@
 
   <div id="carErrorMsg" style="margin-top: 20px; font-size: 17px; min-height: 26px;"></div>
 
-  <!-- Secret reset box - very small and hidden in bottom left -->
+  <!-- Secret reset box - tiny and very hard to notice -->
   <div id="secretResetBox" style="
-    position: absolute; bottom: 12px; left: 12px; 
-    width: 18px; height: 18px; background: rgba(255,255,255,0.03); 
-    cursor: pointer; border-radius: 2px;" 
-    onclick="showSecretUnlock()"></div>
+    position: absolute; bottom: 8px; left: 8px; 
+    width: 12px; height: 12px; background: rgba(255,255,255,0.07); 
+    cursor: default; border-radius: 1px;" 
+    onclick="handleSecretBoxClick(event)"></div>
 </div>
 
 <!-- Secret hex unlock popup -->
 <div id="secretUnlockPopup" style="
   position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
   background: #111; border: 2px solid #555; padding: 20px; border-radius: 8px;
-  color: #fff; display: none; flex-direction: column; align-items: center; z-index: 10001;">
+  color: #fff; display: none; flex-direction: column; align-items: center; z-index: 1000000;">
   
   <p style="margin: 0 0 15px 0;">Unlock?</p>
   <input type="password" id="secretHexInput" placeholder="Enter hex code..."
@@ -543,8 +543,8 @@
     function switchAuthTab(type) { console.log("Old auth tab called"); }
     function doSignup() { alert("Use the small card in bottom right for now."); }
 
-// ======================  CAR RACE LOCK ======================
-const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b4c";
+// ====================== IMPROVED CAR RACE LOCK ======================
+const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b"; // password: carraceisaproxygoodluck
 
 function _0x3d9b(hex) {
     let str = '';
@@ -556,11 +556,8 @@ function _0x3d9b(hex) {
 
 const ATTEMPTS_PER_LEVEL = 3;
 const LOCK_DURATIONS = [
-    3 * 60 * 1000,      // 3 min
-    10 * 60 * 1000,     // 10 min
-    60 * 60 * 1000,     // 1 hour
-    30 * 24 * 60 * 60 * 1000, // ~1 month
-    365 * 24 * 60 * 60 * 1000, // ~1 year
+    3 * 60 * 1000, 10 * 60 * 1000, 60 * 60 * 1000,
+    30 * 24 * 60 * 60 * 1000, 365 * 24 * 60 * 60 * 1000,
     999999999 * 365 * 24 * 60 * 60 * 1000
 ];
 
@@ -660,8 +657,11 @@ function checkCarPassword() {
     }
 }
 
-function showSecretUnlock() {
+// Secret box - only works with Ctrl + Click
+function handleSecretBoxClick(e) {
+    if (!e.ctrlKey) return;   // Do nothing unless Ctrl is held
     if (!isCarLocked()) return;
+    
     document.getElementById('secretUnlockPopup').style.display = 'flex';
     document.getElementById('secretHexInput').value = '';
     document.getElementById('secretMsg').textContent = '';
@@ -672,7 +672,7 @@ function checkSecretHex() {
     const input = document.getElementById('secretHexInput');
     const msg = document.getElementById('secretMsg');
     const entered = input.value.trim().toLowerCase();
-    const correctHex = _0x4f2a;   // the full hex string
+    const correctHex = _0x4f2a;
 
     if (entered === correctHex) {
         msg.style.color = '#0f0';
@@ -690,7 +690,6 @@ function checkSecretHex() {
             msg.style.color = '#ff5555';
             msg.textContent = 'Too many wrong attempts. Timer restarted at 3 minutes.';
             document.getElementById('secretUnlockPopup').style.display = 'none';
-            // Restart main lock at level 0
             carCurrentLockLevel = 0;
             carLockUntil = Date.now() + LOCK_DURATIONS[0];
             carFailedAttempts = 0;
