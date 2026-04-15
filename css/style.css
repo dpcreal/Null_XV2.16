@@ -822,7 +822,7 @@ button.in-game-button[attr-snapped='true'] img {
 }
 
 /* ============================================= */
-/* NEW: Collapsible Member Sidebar (Left Side)   */
+/* COLLAPSIBLE MEMBER SIDEBAR (Left Side)       */
 /* ============================================= */
 .member-sidebar {
   position: fixed;
@@ -833,16 +833,23 @@ button.in-game-button[attr-snapped='true'] img {
   background: #1f2a38;
   color: #ddd;
   z-index: 900;
-  transition: all 0.35s ease;
+  transition: width 0.35s ease, padding 0.35s ease;
   padding: 20px;
   overflow-y: auto;
   box-shadow: 3px 0 15px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
 }
 
 .member-sidebar.collapsed {
-  width: 0;
-  padding: 0;
+  width: 68px;           /* narrow but button stays visible */
+  padding: 20px 10px;
   overflow: hidden;
+}
+
+.member-sidebar.collapsed .sidebar-header h3,
+.member-sidebar.collapsed > div:not(.sidebar-header) {
+  display: none;         /* hide text when collapsed */
 }
 
 .sidebar-header {
@@ -852,11 +859,13 @@ button.in-game-button[attr-snapped='true'] img {
   margin-bottom: 25px;
   padding-bottom: 15px;
   border-bottom: 1px solid #34495e;
+  flex-shrink: 0;
 }
 
 .sidebar-header h3 {
   margin: 0;
   color: #fff;
+  white-space: nowrap;
 }
 
 .sidebar-toggle {
@@ -867,6 +876,7 @@ button.in-game-button[attr-snapped='true'] img {
   cursor: pointer;
   padding: 4px 10px;
   border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
@@ -876,8 +886,8 @@ button.in-game-button[attr-snapped='true'] img {
 /* Floating button when sidebar is collapsed */
 .floating-sidebar-toggle {
   position: fixed;
-  left: 15px;
-  top: 20px;
+  left: 22px;
+  top: 25px;
   width: 52px;
   height: 52px;
   background: #1f2a38;
@@ -891,15 +901,18 @@ button.in-game-button[attr-snapped='true'] img {
   cursor: pointer;
   z-index: 1000;
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
 }
 
 .floating-sidebar-toggle:hover {
   background: #2c3e50;
+  transform: scale(1.1);
 }
 
 /* Push main content when sidebar is open */
 #everything-else {
   transition: margin-left 0.35s ease;
+  margin-left: 0;
 }
 
 #everything-else.with-sidebar {
