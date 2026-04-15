@@ -339,10 +339,11 @@
     </div> 
         </div>   <!-- this is the closing of .settings -->
 
-    <!-- NEW: Small Sign-in Card - Bottom Right Corner -->
-    <div class="small-signin-card" id="smallSigninCard">
-      Don't click me or the website will break :]
-    </div>
+    <!-- Small Sign-in Card -->
+<div class="small-signin-card" id="smallSigninCard" 
+     style="cursor: pointer; user-select: none; z-index: 100;">
+  Sign In / Account
+</div>
     <!-- SIGN IN POP-UP MODAL -->
 <dialog id="signinModal">
   <div class="modal-content">
@@ -750,70 +751,38 @@ window.addEventListener('load', () => {
         });
     }
 });
-// ====================== NEW SECURE MODAL SIGN-IN ======================
-// Secure password hashing
-async function hashPassword(password, salt) {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const hash = await crypto.subtle.deriveBits({
-    name: "PBKDF2",
-    salt: encoder.encode(salt),
-    iterations: 600000,
-    hash: "SHA-256"
-  }, key, 256);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-function generateSalt() {
-  const arr = new Uint8Array(16);
-  crypto.getRandomValues(arr);
-  return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
-}
-
+// ====================== FIXED SIGN-IN SYSTEM ======================
 let users = JSON.parse(localStorage.getItem('null_x_users')) || [];
 let currentUser = JSON.parse(localStorage.getItem('null_x_current_user')) || null;
 
-function saveUsers() {
-  localStorage.setItem('null_x_users', JSON.stringify(users));
-}
-
-// Modal controls - FIXED VERSION
+const smallCard = document.getElementById('smallSigninCard');
 const signinModal = document.getElementById('signinModal');
-
-function openModal() {
-  if (signinModal) {
-    signinModal.showModal();
-  } else {
-    console.error("Modal element not found! Check if <dialog id='signinModal'> exists.");
-  }
-}
-
-function closeModal() {
-  if (signinModal) signinModal.close();
-}
+const memberSidebar = document.getElementById('memberSidebar');
 
 // Make small card clickable
 if (smallCard) {
-  smallCard.style.cursor = "pointer";
-  smallCard.addEventListener("click", (e) => {
-    e.stopPropagation();   // Prevent any other clicks
-    openModal();
-  });
-} else {
-  console.error("smallSigninCard element not found!");
+    smallCard.style.cursor = "pointer";
+    smallCard.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (signinModal) {
+            signinModal.showModal();
+        }
+    });
 }
 
-// Red X close
+// Close modal with X
 const closeBtn = document.getElementById("closeModalBtn");
 if (closeBtn) {
-  closeBtn.addEventListener("click", closeModal);
+    closeBtn.addEventListener("click", () => {
+        if (signinModal) signinModal.close();
+    });
 }
 
-// Click backdrop to close
+// Close when clicking outside the modal
 if (signinModal) {
-  signinModal.addEventListener("click", (e) => {
-    if (e.target === signinModal) closeModal();
-  });
+    signinModal.addEventListener("click", (e) => {
+        if (e.target === signinModal) signinModal.close();
+    });
 }
 
 // Tab switching
@@ -823,112 +792,111 @@ const signupForm = document.getElementById("modalSignupForm");
 const loginForm = document.getElementById("modalLoginForm");
 
 if (signupTab && loginTab) {
-  signupTab.addEventListener("click", () => {
-    signupForm.classList.remove("hidden");
-    loginForm.classList.add("hidden");
-    signupTab.classList.add("active");
-    loginTab.classList.remove("active");
-  });
-
-  loginTab.addEventListener("click", () => {
-    signupForm.classList.add("hidden");
-    loginForm.classList.remove("hidden");
-    signupTab.classList.remove("active");
-    loginTab.classList.add("active");
-  });
+    signupTab.addEventListener("click", () => {
+        signupForm.classList.remove("hidden");
+        loginForm.classList.add("hidden");
+        signupTab.classList.add("active");
+        loginTab.classList.remove("active");
+    });
+    loginTab.addEventListener("click", () => {
+        signupForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        signupTab.classList.remove("active");
+        loginTab.classList.add("active");
+    });
 }
 
 // Password toggles
-const passwordToggles = [
-  { input: "modalSignupPassword", toggle: "toggleModalSignupPassword" },
-  { input: "modalLoginPassword", toggle: "toggleModalLoginPassword" }
-];
-
-passwordToggles.forEach(item => {
-  const inputEl = document.getElementById(item.input);
-  const toggleEl = document.getElementById(item.toggle);
-  if (toggleEl && inputEl) {
-    toggleEl.addEventListener("click", () => {
-      inputEl.type = inputEl.type === "password" ? "text" : "password";
+document.querySelectorAll('.toggle-password').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+        const input = toggle.previousElementSibling;
+        if (input) input.type = input.type === 'password' ? 'text' : 'password';
     });
-  }
 });
 
-// Create Account
+// Simple hash
+async function hashPassword(password, salt) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const hash = await crypto.subtle.deriveBits({
+        name: "PBKDF2", salt: encoder.encode(salt), iterations: 600000, hash: "SHA-256"
+    }, key, 256);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function generateSalt() {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function saveUsers() {
+    localStorage.setItem('null_x_users', JSON.stringify(users));
+}
+
+// Signup
 async function handleModalSignup() {
-  const email = document.getElementById("modalSignupEmail").value.trim();
-  const username = document.getElementById("modalSignupUsername").value.trim();
-  const password = document.getElementById("modalSignupPassword").value;
-  const msg = document.getElementById("modalSignupMessage");
+    const email = document.getElementById("modalSignupEmail").value.trim();
+    const username = document.getElementById("modalSignupUsername").value.trim();
+    const password = document.getElementById("modalSignupPassword").value;
+    const msg = document.getElementById("modalSignupMessage");
 
-  if (!email || !username || password.length < 8) {
-    msg.innerHTML = '<span style="color:#ff6b6b">Please fill all fields. Password ≥ 8 chars.</span>';
-    return;
-  }
+    if (!email || !username || password.length < 8) {
+        msg.innerHTML = '<span style="color:#ff6b6b">All fields required. Password ≥ 8 chars.</span>';
+        return;
+    }
+    if (users.some(u => u.username === username || u.email === email)) {
+        msg.innerHTML = '<span style="color:#ff6b6b">Username or email taken.</span>';
+        return;
+    }
 
-  if (users.some(u => u.username === username || u.email === email)) {
-    msg.innerHTML = '<span style="color:#ff6b6b">Username or email taken.</span>';
-    return;
-  }
+    const salt = generateSalt();
+    const hashed = await hashPassword(password, salt);
+    users.push({ email, username, salt, hashedPassword: hashed });
+    saveUsers();
 
-  const salt = generateSalt();
-  const hashed = await hashPassword(password, salt);
-
-  users.push({ email, username, salt, hashedPassword: hashed });
-  saveUsers();
-
-  msg.innerHTML = '<span style="color:#4ade80">Account created! Switch to Login.</span>';
-  document.getElementById("modalSignupEmail").value = "";
-  document.getElementById("modalSignupUsername").value = "";
-  document.getElementById("modalSignupPassword").value = "";
+    msg.innerHTML = '<span style="color:#4ade80">Account created! Switch to Login.</span>';
 }
 
 // Login
 async function handleModalLogin() {
-  const username = document.getElementById("modalLoginUsername").value.trim();
-  const password = document.getElementById("modalLoginPassword").value;
-  const msg = document.getElementById("modalLoginMessage");
+    const username = document.getElementById("modalLoginUsername").value.trim();
+    const password = document.getElementById("modalLoginPassword").value;
+    const msg = document.getElementById("modalLoginMessage");
 
-  const user = users.find(u => u.username === username);
-  if (!user) {
-    msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
-    return;
-  }
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
+        return;
+    }
 
-  const hashedInput = await hashPassword(password, user.salt);
-  if (hashedInput === user.hashedPassword) {
-    currentUser = { username };
-    localStorage.setItem('null_x_current_user', JSON.stringify(currentUser));
+    const hashedInput = await hashPassword(password, user.salt);
+    if (hashedInput === user.hashedPassword) {
+        currentUser = { username };
+        localStorage.setItem('null_x_current_user', JSON.stringify(currentUser));
 
-    msg.innerHTML = `<span style="color:#4ade80">Welcome, ${username}!</span>`;
-    closeModal();
+        smallCard.style.background = "#2ecc71";
+        smallCard.innerHTML = `Account<br><small>(${username})</small>`;
+        memberSidebar.style.display = "block";
 
-    smallCard.style.background = "#2ecc71";
-    smallCard.innerHTML = `Account<br><small>(${username})</small>`;
-    document.getElementById("memberSidebar").style.display = "block";
+        msg.innerHTML = `<span style="color:#4ade80">Welcome, ${username}!</span>`;
 
-    alert(`Logged in as ${username}!`);
-  } else {
-    msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
-  }
+        setTimeout(() => {
+            if (signinModal) signinModal.close();
+        }, 800);
+    } else {
+        msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
+    }
 }
 
-// Remember login on refresh
+// Load saved login on refresh
 window.addEventListener("load", () => {
-  currentUser = JSON.parse(localStorage.getItem('null_x_current_user')) || null;
-  if (currentUser && smallCard) {
-    smallCard.style.background = "#2ecc71";
-    smallCard.innerHTML = `Account<br><small>(${currentUser.username})</small>`;
-    document.getElementById("memberSidebar").style.display = "block";
-  }
-});
-// Extra clear when user goes back to main page
-document.getElementById('carRaceOverlay').addEventListener('transitionend', () => {
-    if (document.getElementById('carRaceOverlay').style.display === 'none') {
-        const input = document.getElementById('carPassInput');
-        if (input) input.value = '';
+    currentUser = JSON.parse(localStorage.getItem('null_x_current_user')) || null;
+    if (currentUser && smallCard) {
+        smallCard.style.background = "#2ecc71";
+        smallCard.innerHTML = `Account<br><small>(${currentUser.username})</small>`;
+        memberSidebar.style.display = "block";
     }
 });
-</script>
 </body>
 </html>
