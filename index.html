@@ -488,66 +488,65 @@
     </button>
   </section>
 
-  <script src="js/config.js"></script>
+    <script src="js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="js/loading.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.8.0/lib/p5.min.js" defer></script>
   <script src="js/bg.js" defer></script>
-  <script src="js/index.js" defer></script>
-  
-     <script>
-// ====================== DATABASE LOGIC ======================
-    // Local Database logic
-    let db = JSON.parse(localStorage.getItem('null_x_users')) || [];
-    const sidebar = document.getElementById('memberSidebar');
-    const floatingBtn = document.getElementById('floatingSidebarBtn');
-    const collapseBtn = document.getElementById('sidebarCollapseBtn');
-    const smallCard = document.getElementById('smallSigninCard');
-    const mainContent = document.getElementById('everything-else');
+  <script src="js/index.js" defer"></script>
 
-    function toggleSidebar() {
-      sidebar.classList.toggle('collapsed');
-      if(mainContent) {
-          mainContent.classList.toggle('with-sidebar');
-      }
-      if (sidebar.classList.contains('collapsed')) {
-        collapseBtn.textContent = '→';
-        floatingBtn.style.display = 'flex';
-      } else {
-        collapseBtn.textContent = '←';
-        floatingBtn.style.display = 'none';
-      }
+  <!-- FIXED MEMBER SIDEBAR SCRIPT -->
+  <script>
+  // ====================== MEMBER SIDEBAR - FIXED VERSION ======================
+  const sidebar = document.getElementById('memberSidebar');
+  const collapseBtn = document.getElementById('sidebarCollapseBtn');
+  const floatingBtn = document.getElementById('floatingSidebarBtn');
+  const mainContent = document.getElementById('everything-else');
+
+  function toggleSidebar() {
+    if (!sidebar) {
+      console.error("Sidebar element not found!");
+      return;
     }
 
-    function doLogin() {
-      const u = document.getElementById('logUser') ? document.getElementById('logUser').value.trim() : '';
-      const p = document.getElementById('logPass') ? document.getElementById('logPass').value : '';
-      const found = db.find(user => user.u === u && user.p === p);
-      if (found) {
-        isSignedIn = true;
-        sidebar.style.display = 'block';
-        smallCard.style.background = '#2ecc71';
-        smallCard.innerHTML = `Account<br><small>(${u})</small>`;
-        alert("Logged in! Sidebar should appear on the left.");
-      } else {
-        alert("Invalid username or password.");
-      }
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+
+    if (mainContent) {
+      mainContent.classList.toggle('with-sidebar', !isCollapsed);
     }
 
-    function doLogout() {
-      isSignedIn = false;
-      sidebar.style.display = 'none';
-      smallCard.style.background = '#3498db';
-      smallCard.innerHTML = 'Sign In / Account';
-      alert("Logged out.");
+    if (isCollapsed) {
+      if (collapseBtn) collapseBtn.textContent = '→';
+      if (floatingBtn) floatingBtn.style.display = 'flex';
+    } else {
+      if (collapseBtn) collapseBtn.textContent = '←';
+      if (floatingBtn) floatingBtn.style.display = 'none';
+    }
+  }
+
+  // Attach button listeners when page loads
+  window.addEventListener('load', () => {
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', toggleSidebar);
+    } else {
+      console.error("Collapse button (#sidebarCollapseBtn) not found!");
     }
 
-    function switchAuthTab(type) { console.log("Old auth tab called"); }
-    function doSignup() { alert("Use the small card in bottom right for now."); }
+    if (floatingBtn) {
+      floatingBtn.addEventListener('click', toggleSidebar);
+    }
 
-// ====================== IMPROVED CAR RACE LOCK ======================
+    // Show sidebar if user is logged in
+    const currentUser = JSON.parse(localStorage.getItem('null_x_current_user'));
+    if (currentUser && sidebar) {
+      sidebar.style.display = 'flex';
+    }
+  });
+</script>
+
+<!-- ==================== IMPROVED CAR RACE LOCK ==================== -->
+<script>
 const _0x4f2a = "6a757374676976657570696d69727269746174656473746f70747279696e67736f68617264";
-
 function _0x3d9b(hex) {
     let str = '';
     for (let i = 0; i < hex.length; i += 2) {
@@ -555,14 +554,12 @@ function _0x3d9b(hex) {
     }
     return str;
 }
-
 const ATTEMPTS_PER_LEVEL = 3;
 const LOCK_DURATIONS = [
     3 * 60 * 1000, 10 * 60 * 1000, 60 * 60 * 1000,
     30 * 24 * 60 * 60 * 1000, 365 * 24 * 60 * 60 * 1000,
     999999999 * 365 * 24 * 60 * 60 * 1000
 ];
-
 let carFailedAttempts = 0;
 let carCurrentLockLevel = 0;
 let carLockUntil = 0;
@@ -631,7 +628,6 @@ function checkCarPassword() {
     const input = document.getElementById('carPassInput');
     const msg = document.getElementById('carErrorMsg');
     const realPass = _0x3d9b(_0x4f2a);
-
     if (input.value.trim() === realPass) {
         msg.style.color = '#0f0';
         msg.textContent = 'Correct! Loading game...';
@@ -642,20 +638,15 @@ function checkCarPassword() {
         }, 600);
     } else {
         input.value = '';
-        carFailedAttempts++; // Increment the failure
-        
-        // --- KEY CHANGE START ---
-        // Save the state IMMEDIATELY so refresh doesn't reset attempts
-        saveCarLockState(); 
-        // --- KEY CHANGE END ---
-
+        carFailedAttempts++;
+        saveCarLockState();
         if (carFailedAttempts >= ATTEMPTS_PER_LEVEL) {
             carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
             carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
             carFailedAttempts = 0;
             msg.style.color = '#ff5555';
             msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
-            saveCarLockState(); // Save the new lock timing
+            saveCarLockState();
             startCountdown();
             disableInputWhileLocked();
         } else {
