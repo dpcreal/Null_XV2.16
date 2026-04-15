@@ -809,7 +809,12 @@ button.in-game-button[attr-snapped='true'] img {
   font-weight: bold;
   box-shadow: 0 8px 25px rgba(0,0,0,0.25);
   cursor: pointer;
-  z-index: 950;
+  
+  /* --- FIXES START HERE --- */
+  z-index: 2001 !important;  /* Higher than everything else */
+  pointer-events: auto;      /* Forces it to be clickable */
+  /* --- FIXES END HERE --- */
+  
   transition: all 0.3s ease;
   text-align: center;
   padding: 0 15px;
@@ -839,12 +844,14 @@ button.in-game-button[attr-snapped='true'] img {
   box-shadow: 3px 0 15px rgba(0,0,0,0.4);
   display: flex;
   flex-direction: column;
+  pointer-events: auto;
 }
 
 .member-sidebar.collapsed {
   width: 68px;           /* narrow but button stays visible */
   padding: 20px 10px;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .member-sidebar.collapsed .sidebar-header h3,
@@ -1063,4 +1070,21 @@ button.in-game-button[attr-snapped='true'] img {
 /* IMPORTANT: Hide the non-active form */
 .hidden {
     display: none !important;
+}
+/* 1. Ensure the Toggle Button still works when sidebar is collapsed */
+.member-sidebar.collapsed .sidebar-toggle,
+.member-sidebar.collapsed .sidebar-header {
+    pointer-events: auto !important;
+}
+
+/* 2. Double check the Sign-in Card is on the top floor */
+.small-signin-card {
+    z-index: 2005 !important; /* Extremely high to beat any other overlays */
+    pointer-events: auto !important;
+}
+
+/* 3. Ensure the modal backdrop doesn't break the UI when hidden */
+dialog:not([open]) {
+    display: none !important;
+    pointer-events: none;
 }
