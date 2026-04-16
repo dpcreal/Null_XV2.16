@@ -951,51 +951,53 @@ window.addEventListener('load', () => {
         }, 800);
     });
 });
-// --- ADVANCED AI MODERATOR ---
 function nullX_Advanced_AI(text) {
     const input = text.toLowerCase();
     
-    // LAYER 1: Deep Scrubber (Normalization)
-    // Removes all noise and converts numbers/symbols to their closest letter
-    const scrubbed = input
-        .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e')
-        .replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't')
-        .replace(/8/g, 'b').replace(/9/g, 'g').replace(/v/g, 'u')
-        .replace(/[^a-z]/g, ''); // Removes all remaining symbols
+    // 1. DATA SCRUBBING
+    const scrubbed = input.replace(/[01345789]/g, c => ({'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','8':'b','9':'g'}[c])).replace(/[^a-z]/g, '');
+    const phonetic = scrubbed.replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/oo/g, 'u').replace(/ee/g, 'i');
 
-    // LAYER 2: Phonetic Simplifier (Sound-Alike Logic)
-    // This turns "ph", "f", and "v" into a single character to catch "sounds"
-    const phonetic = scrubbed
-        .replace(/ph/g, 'f')
-        .replace(/ck/g, 'k')
-        .replace(/oo/g, 'u')
-        .replace(/ee/g, 'i');
+    // 2. THE MEGA-MAP (Forbidden Root -> Safe Words that contain it)
+    const safetyRules = {
+        "dic": ["dickson", "dickens", "benedict", "indicate"],
+        "dik": ["dickson"],
+        "nig": ["knight", "night", "enigma", "nigeria"],
+        "sex": ["saxon", "sextant"],
+        "die": ["diesel", "diet", "dierks"],
+        "kil": ["skill", "kilogram", "kilimanjaro"]
+    };
 
-    // LAYER 3: The "Forbidden Core" (Root Fragments)
-    // We use fragments so that "killmenow" is caught because it contains "kil"
-    const forbidden = ["kil", "die", "dth", "mrd", "nig", "fuk", "fuc", "sht", "cnt", "bch", "pus", "slv", "rpe", "sex", "prn", "nzi", "htl"];
+    // 3. THE "FORBIDDEN ONLY" LIST (Words with NO exceptions)
+    const totalBan = ["fuk", "fuc", "sht", "cnt", "bch", "pus", "slv", "rpe", "prn", "nzi", "htl"];
 
-    // LAYER 4: Recursive Substring Scan
-    // This looks at every possible chunk of the name
     let foundViolation = false;
-    
-    // Check the raw, scrubbed, and phonetic versions
-    [input, scrubbed, phonetic].forEach(version => {
-        forbidden.forEach(root => {
-            if (version.includes(root)) foundViolation = true;
-        });
-    });
 
-    // LAYER 5: Entropy Check (Anti-Bypass)
-    // If the name is long but has very few vowels or too many repeated chars, it's a bypass attempt
-    const vowels = (input.match(/[aeiou]/g) || []).length;
-    const uniqueChars = new Set(input).size;
-    
-    // If name is long and has almost no vowels, it's likely a hidden slur or gibberish
-    if (input.length > 6 && vowels === 0) foundViolation = true;
-    
-    // If name is just one character repeated over and over (e.g., "aaaaaaaaa")
-    if (input.length > 5 && uniqueChars < 3) foundViolation = true;
+    // 4. SCAN LAYER: CONTEXTUAL CHECK
+    // This checks if a root exists, then checks if it's "protected"
+    for (const [root, safeWords] of Object.entries(safetyRules)) {
+        if (scrubbed.includes(root)) {
+            // Check if the full scrubbed text is actually one of the safe words
+            const isSafe = safeWords.some(safe => scrubbed.includes(safe));
+            if (!isSafe) {
+                foundViolation = true;
+                break; 
+            }
+        }
+    }
+
+    // 5. SCAN LAYER: TOTAL BANS
+    if (!foundViolation) {
+        [input, scrubbed, phonetic].forEach(version => {
+            totalBan.forEach(root => {
+                if (version.includes(root)) foundViolation = true;
+            });
+        });
+    }
+
+    // 6. ENTROPY CHECK
+    if (input.length > 6 && (input.match(/[aeiou]/g) || []).length === 0) foundViolation = true;
+    if (input.length > 5 && new Set(input).size < 3) foundViolation = true;
 
     return foundViolation;
 }
