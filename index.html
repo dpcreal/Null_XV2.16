@@ -885,109 +885,100 @@ document.addEventListener('click', (e) => {
         location.reload();
     }
 });
-
-// --- UNIVERSAL AI USERNAME SCANNER (20s FAIL-SAFE) ---
+// Real-time username validation - expanded bad words
 window.addEventListener('load', () => {
     const usernameInput = document.getElementById("modalSignupUsername");
     const msg = document.getElementById("modalSignupMessage");
     const createBtn = document.querySelector("#modalSignupForm button");
     
-    if (!usernameInput || !createBtn) return;
+    if (!usernameInput || !msg || !createBtn) return;
 
-    let scanTimer;
+    const badWords = [
+        // Core swears & sexual terms
+        "fuck", "fuk", "fck", "phuck", "shit", "sh1t", "sht", "cunt", "kunt", "bitch", "btch", 
+        "asshole", "asshole", "ass", "arse", "bollocks", "wanker", "twat", "pussy", "puss", 
+        "cock", "dick", "prick", "cocksucker", "motherfucker", "mf", "fucker", "fuckface", 
+        "cum", "jizz", "semen", "spunk", "whore", "slut", "slag", "hoe", "thot", "bimbo", 
+        "tit", "tits", "boob", "vagina", "penis", "clit", "labia", "rape", "rapist", "pedophile", 
+        "pedo", "molest", "incest", "bestiality", "porn", "porno", "xxx",
 
-    usernameInput.addEventListener('input', () => {
+        // Racial & ethnic slurs (very common ones)
+        "nigger", "nigga", "n1gger", "nigg3r", "ni99er", "nigguh", "niglet", "coon", "spook", 
+        "sambo", "junglebunny", "porchmonkey", "chink", "chingchong", "gook", "jap", "nip", 
+        "kike", "yid", "heeb", "beaner", "wetback", "spic", "spick", "paki", "towelhead", 
+        "raghead", "sandnigger", "hajji", "cracker", "honky", "redneck", "whitey", "wop", 
+        "dago", "kraut", "mick", "polack", "gyp", "gypsy", "injun", "redskin", "squaw",
+
+        // Ableist / other offensive
+        "retard", "r tard", "retarded", "spaz", "cripple", "mong", "mongoloid", "faggot", 
+        "fag", "fgt", "queer", "tranny", "trannie", "dyke", "lezzie", "homo", "fairy", 
+        "bastard", "basturd", "bitchass", "douche", "douchebag", "scum", "scumbag", 
+        "trash", "garbage", "idiot", "moron", "imbecile", "cretin", "cuck", "simp", "incel"
+    ];
+
+    function normalize(name) {
+        return name.toLowerCase()
+            .replace(/[^a-z0-9]/g, '')           // remove symbols/spaces
+            .replace(/[1!l]/g, 'i')              // common leetspeak
+            .replace(/[3e]/g, 'e')
+            .replace(/[4a]/g, 'a')
+            .replace(/[5s]/g, 's')
+            .replace(/[0o]/g, 'o')
+            .replace(/[7t]/g, 't');
+    }
+
+    function isBadUsername(name) {
+        if (name.length < 3) return true;   // too short
+
+        const norm = normalize(name);
+
+        // Direct substring check on normalized version
+        if (badWords.some(word => norm.includes(word))) {
+            return true;
+        }
+
+        // Extra regex for very common bypass patterns on the worst words
+        if (/n[i1!l]+g+[e3a]+r+/i.test(name) || 
+            /f[u1!]+c+[k]+/i.test(name) || 
+            /p[u]+s+[s]+[y]+/i.test(name) || 
+            /d[i1!l]+c+[k]+/i.test(name) || 
+            /c[u]+n+[t]+/i.test(name) || 
+            /b[i1!]+t+c+[h]+/i.test(name)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function validateUsername() {
         const name = usernameInput.value.trim();
-        clearTimeout(scanTimer);
-
-        // Lock button immediately
-        createBtn.disabled = true;
-
-        if (name.length < 3) {
-            msg.innerHTML = name.length === 0 ? '' : '<span style="color:#aaa">Too short...</span>';
+        if (name.length === 0) {
+            msg.innerHTML = '';
+            createBtn.disabled = true;
             return;
         }
 
-        msg.innerHTML = '<span style="color:#c084fc; font-family:monospace;" class="scanning">AI CONTENT GUARD: ANALYZING...</span>';
+        const taken = users.some(u => u.username.toLowerCase() === name.toLowerCase());
 
-        scanTimer = setTimeout(async () => {
-            let isBad = false;
-            
-            // 20-second timeout promise
-            const apiTimeout = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Timeout")), 20000)
-            );
+        if (isBadUsername(name)) {
+            msg.innerHTML = '<span style="color:#ff6b6b">Username contains inappropriate content. Please choose another.</span>';
+            createBtn.disabled = true;
+        } else if (taken) {
+            msg.innerHTML = '<span style="color:#ff6b6b">Username is already taken.</span>';
+            createBtn.disabled = true;
+        } else {
+            msg.innerHTML = '<span style="color:#4ade80">Username looks good ✓</span>';
+            createBtn.disabled = false;
+        }
+    }
 
-            try {
-                // RACE: Either the AI finishes or the 20s clock runs out
-                isBad = await Promise.race([
-                    (async () => {
-                        const local = nullX_Advanced_AI(name); 
-                        const api = await checkToxicity(name); 
-                        return local || api;
-                    })(),
-                    apiTimeout
-                ]);
-            } catch (err) {
-                console.warn("AI Offline. Using local Advanced Brain only.");
-                // Fallback: If API fails, just trust your Advanced AI
-                isBad = nullX_Advanced_AI(name);
-                msg.innerHTML += ' <small style="color:#aaa">(Backup Active)</small>';
-            }
-
-            if (isBad) {
-                msg.innerHTML = '<span style="color:#ff6b6b">⚠️ AI SECURITY: Violation Detected.</span>';
-                createBtn.disabled = true;
-            } else {
-                const isTaken = users.some(u => u.username.toLowerCase() === name.toLowerCase());
-                if (isTaken) {
-                    msg.innerHTML = '<span style="color:#ff6b6b">Username already taken.</span>';
-                    createBtn.disabled = true;
-                } else {
-                    msg.innerHTML = '<span style="color:#4ade80">✓ AI APPROVED: Safety check 100%</span>';
-                    createBtn.disabled = false;
-                }
-            }
-        }, 800);
-    });
+    usernameInput.addEventListener('input', validateUsername);
+    // Run once when modal opens
+    const signinModal = document.getElementById('signinModal');
+    if (signinModal) {
+        signinModal.addEventListener('show', validateUsername);
+    }
 });
-// 1. THE CONTEXTUAL MAP (Banned Roots with "Safe" Exceptions)
-    const safetyRules = {
-        "dic": ["dickson", "dickens", "benedict", "indicate", "dictionary", "dictator", "prediction", "dedicate"],
-        "dik": ["dickson", "mordikai"],
-        "nig": ["knight", "night", "enigma", "nigeria", "benign", "nigel", "signature", "cognizant"],
-        "sex": ["saxon", "sextant", "sextet", "inflexion"],
-        "die": ["diesel", "diet", "dierks", "soldier", "audience", "dietary", "diego"],
-        "kil": ["skill", "kilogram", "kilimanjaro", "kilobyte", "kilter"],
-        "ass": ["class", "glass", "assign", "assist", "grass", "assets", "pass", "passion", "bass", "massive"],
-        "cum": ["cumulus", "accumulate", "circumstance", "encumber"],
-        "anal": ["analyze", "analysis", "analog"],
-        "tit": ["title", "entity", "quantity", "titular", "attitude", "partition"]
-    };
-
-    // 2. THE TOTAL BAN LIST (Aggressive Slurs and Explicit Content)
-    const totalBan = [
-        "fuc", "fuk", "fck", "phuck", "phuk", "vukk", "vuck", // variations of F
-        "sht", "sh1t", "shlt", "sheit", "shat",             // variations of S
-        "cnt", "cunt", "kunt", "knt",                      // variations of C
-        "bch", "btch", "bitch", "bytch", "bytch",           // variations of B
-        "pusy", "puss", "pusi", "pussy",                   // variations of P
-        "slv", "slut", "slvt",                             // variations of Slut
-        "rpe", "rape", "rapi",                             // variations of R
-        "seks", "porn", "prn", "p0rn", "xrr", "xxx",       // Adult content
-        "nzi", "nazi", "htl", "hitl", "fuhr",              // Hate speech
-        "trrd", "trard", "retard", "rtd",                  // Ableist slurs
-        "ped0", "pedo", "molst", "chld",                   // Harmful content
-        "fag", "fgt", "fggt", "queer", "trany",            // Identity slurs
-        "gook", "kike", "spic", "wetb", "chink"            // Racial slurs
-    ];
-
-    // 3. VIOLENCE & THREATS (Focusing on harm intent)
-    const violenceRoots = [
-        "kill", "mrder", "murd", "death", "dead", "suicid", 
-        "bomb", "teror", "shoot", "gun", "knife", "slay", 
-        "blood", "hang", "strng"
-    ];
 </script>
 </body>
 </html>
