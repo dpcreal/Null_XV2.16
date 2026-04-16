@@ -951,56 +951,43 @@ window.addEventListener('load', () => {
         }, 800);
     });
 });
-function nullX_Advanced_AI(text) {
-    const input = text.toLowerCase();
-    
-    // 1. DATA SCRUBBING
-    const scrubbed = input.replace(/[01345789]/g, c => ({'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','8':'b','9':'g'}[c])).replace(/[^a-z]/g, '');
-    const phonetic = scrubbed.replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/oo/g, 'u').replace(/ee/g, 'i');
-
-    // 2. THE MEGA-MAP (Forbidden Root -> Safe Words that contain it)
+// 1. THE CONTEXTUAL MAP (Banned Roots with "Safe" Exceptions)
     const safetyRules = {
-        "dic": ["dickson", "dickens", "benedict", "indicate"],
-        "dik": ["dickson"],
-        "nig": ["knight", "night", "enigma", "nigeria"],
-        "sex": ["saxon", "sextant"],
-        "die": ["diesel", "diet", "dierks"],
-        "kil": ["skill", "kilogram", "kilimanjaro"]
+        "dic": ["dickson", "dickens", "benedict", "indicate", "dictionary", "dictator", "prediction", "dedicate"],
+        "dik": ["dickson", "mordikai"],
+        "nig": ["knight", "night", "enigma", "nigeria", "benign", "nigel", "signature", "cognizant"],
+        "sex": ["saxon", "sextant", "sextet", "inflexion"],
+        "die": ["diesel", "diet", "dierks", "soldier", "audience", "dietary", "diego"],
+        "kil": ["skill", "kilogram", "kilimanjaro", "kilobyte", "kilter"],
+        "ass": ["class", "glass", "assign", "assist", "grass", "assets", "pass", "passion", "bass", "massive"],
+        "cum": ["cumulus", "accumulate", "circumstance", "encumber"],
+        "anal": ["analyze", "analysis", "analog"],
+        "tit": ["title", "entity", "quantity", "titular", "attitude", "partition"]
     };
 
-    // 3. THE "FORBIDDEN ONLY" LIST (Words with NO exceptions)
-    const totalBan = ["fuk", "fuc", "sht", "cnt", "bch", "pus", "slv", "rpe", "prn", "nzi", "htl"];
+    // 2. THE TOTAL BAN LIST (Aggressive Slurs and Explicit Content)
+    const totalBan = [
+        "fuc", "fuk", "fck", "phuck", "phuk", "vukk", "vuck", // variations of F
+        "sht", "sh1t", "shlt", "sheit", "shat",             // variations of S
+        "cnt", "cunt", "kunt", "knt",                      // variations of C
+        "bch", "btch", "bitch", "bytch", "bytch",           // variations of B
+        "pusy", "puss", "pusi", "pussy",                   // variations of P
+        "slv", "slut", "slvt",                             // variations of Slut
+        "rpe", "rape", "rapi",                             // variations of R
+        "seks", "porn", "prn", "p0rn", "xrr", "xxx",       // Adult content
+        "nzi", "nazi", "htl", "hitl", "fuhr",              // Hate speech
+        "trrd", "trard", "retard", "rtd",                  // Ableist slurs
+        "ped0", "pedo", "molst", "chld",                   // Harmful content
+        "fag", "fgt", "fggt", "queer", "trany",            // Identity slurs
+        "gook", "kike", "spic", "wetb", "chink"            // Racial slurs
+    ];
 
-    let foundViolation = false;
-
-    // 4. SCAN LAYER: CONTEXTUAL CHECK
-    // This checks if a root exists, then checks if it's "protected"
-    for (const [root, safeWords] of Object.entries(safetyRules)) {
-        if (scrubbed.includes(root)) {
-            // Check if the full scrubbed text is actually one of the safe words
-            const isSafe = safeWords.some(safe => scrubbed.includes(safe));
-            if (!isSafe) {
-                foundViolation = true;
-                break; 
-            }
-        }
-    }
-
-    // 5. SCAN LAYER: TOTAL BANS
-    if (!foundViolation) {
-        [input, scrubbed, phonetic].forEach(version => {
-            totalBan.forEach(root => {
-                if (version.includes(root)) foundViolation = true;
-            });
-        });
-    }
-
-    // 6. ENTROPY CHECK
-    if (input.length > 6 && (input.match(/[aeiou]/g) || []).length === 0) foundViolation = true;
-    if (input.length > 5 && new Set(input).size < 3) foundViolation = true;
-
-    return foundViolation;
-}
+    // 3. VIOLENCE & THREATS (Focusing on harm intent)
+    const violenceRoots = [
+        "kill", "mrder", "murd", "death", "dead", "suicid", 
+        "bomb", "teror", "shoot", "gun", "knife", "slay", 
+        "blood", "hang", "strng"
+    ];
 </script>
 </body>
 </html>
