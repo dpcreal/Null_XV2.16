@@ -751,7 +751,7 @@ window.addEventListener('load', () => {
         });
     }
 });
-  // Quick fix for small sign-in card click + tab navigation
+  // Quick fix for small sign-in card + tabs + logout
 window.addEventListener('load', () => {
     const smallCard = document.getElementById('smallSigninCard');
     const signinModal = document.getElementById('signinModal');
@@ -763,7 +763,7 @@ window.addEventListener('load', () => {
     if (smallCard && signinModal) {
         smallCard.addEventListener('click', () => {
             signinModal.showModal();
-            // Default to Login tab when opening from the card
+            // Default to Login tab
             if (loginTab && signupTab && loginForm && signupForm) {
                 loginForm.classList.remove("hidden");
                 signupForm.classList.add("hidden");
@@ -773,7 +773,7 @@ window.addEventListener('load', () => {
         });
     }
 
-    // Tab switching (Create Account <-> Login)
+    // Tab switching
     if (signupTab && loginTab && signupForm && loginForm) {
         signupTab.addEventListener("click", () => {
             signupForm.classList.remove("hidden");
@@ -788,6 +788,131 @@ window.addEventListener('load', () => {
             loginTab.classList.add("active");
         });
     }
+
+    // Logout
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'logoutLink') {
+            localStorage.removeItem('null_x_current_user');
+            location.reload();
+        }
+    });
+});
+async function hashPassword(password, salt) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const hash = await crypto.subtle.deriveBits({
+        name: "PBKDF2", salt: encoder.encode(salt), iterations: 600000, hash: "SHA-256"
+    }, key, 256);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function generateSalt() {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function saveUsers() {
+    localStorage.setItem('null_x_users', JSON.stringify(users));
+}
+
+async function handleModalSignup() {
+    const email = document.getElementById("modalSignupEmail").value.trim();
+    const username = document.getElementById("modalSignupUsername").value.trim();
+    const password = document.getElementById("modalSignupPassword").value;
+    const msg = document.getElementById("modalSignupMessage");
+    if (!email || !username || password.length < 8) {
+        msg.innerHTML = '<span style="color:#ff6b6b">All fields required. Password ≥ 8 chars.</span>';
+        return;
+    }
+    if (users.some(u => u.username === username || u.email === email)) {
+        msg.innerHTML = '<span style="color:#ff6b6b">Username or email taken.</span>';
+        return;
+    }
+    const salt = generateSalt();
+    const hashed = await hashPassword(password, salt);
+    users.push({ email, username, salt, hashedPassword: hashed });
+    saveUsers();
+    msg.innerHTML = '<span style="color:#4ade80">Account created! Switch to Login tab.</span>';
+}
+async function handleModalLogin() {
+    const username = document.getElementById("modalLoginUsername").value.trim();
+    const password = document.getElementById("modalLoginPassword").value;
+    const msg = document.getElementById("modalLoginMessage");
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
+        return;
+    }
+    const hashedInput = await hashPassword(password, user.salt);
+    if (hashedInput === user.hashedPassword) {
+        currentUser = { username };
+        localStorage.setItem('null_x_current_user', JSON.stringify(currentUser));
+        smallCard.style.background = "#2ecc71";
+        smallCard.innerHTML = `Account<br><small>(${username})</small> <span id="logoutLink" style="color:#ff6b6b; cursor:pointer; font-size:12px;">(Logout)</span>`;
+        memberSidebar.style.display = "block";
+        msg.innerHTML = `<span style="color:#4ade80">Welcome, ${username}!</span>`;
+        setTimeout(() => { if (signinModal) signinModal.close(); }, 800);
+    } else {
+        msg.innerHTML = '<span style="color:#ff6b6b">Wrong username or password.</span>';
+    }
+}
+  // Restore logged-in state on page load
+window.addEventListener('load', () => {
+    const currentUser = JSON.parse(localStorage.getItem('null_x_current_user'));
+    const smallCard = document.getElementById('smallSigninCard');
+    const memberSidebar = document.getElementById('memberSidebar');
+
+    if (currentUser && smallCard) {
+        smallCard.style.background = "#2ecc71";
+        smallCard.innerHTML = `Account<br><small>(${currentUser.username})</small> <span id="logoutLink" style="color:#ff6b6b; cursor:pointer; font-size:12px;">(Logout)</span>`;
+        if (memberSidebar) memberSidebar.style.display = "block";
+    }
+});
+  // Real-time username validation for signup
+window.addEventListener('load', () => {
+    const usernameInput = document.getElementById("modalSignupUsername");
+    const msg = document.getElementById("modalSignupMessage");
+    const createBtn = document.querySelector("#modalSignupForm button");
+    const signinModal = document.getElementById('signinModal');
+
+    if (!usernameInput || !msg || !createBtn || !signinModal) return;
+
+    const badWords = ["dick", "pussy", "nigger", "nigga", "fuck", "shit", "cunt", "bitch", "asshole", "faggot", "retard", "whore", "slut", "cock", "cum", "porn", "sex", "rape"];
+
+    function validateUsername() {
+        const name = usernameInput.value.trim().toLowerCase();
+
+        if (name.length === 0) {
+            msg.innerHTML = '';
+            createBtn.disabled = true;
+            return;
+        }
+
+        let isBad = badWords.some(word => name.includes(word));
+
+        if (isBad) {
+            msg.innerHTML = '<span style="color:#ff6b6b">Username contains inappropriate language. Please choose another.</span>';
+            createBtn.disabled = true;
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem('null_x_users')) || [];
+        const taken = users.some(u => u.username.toLowerCase() === name);
+
+        if (taken) {
+            msg.innerHTML = '<span style="color:#ff6b6b">Username is already taken.</span>';
+            createBtn.disabled = true;
+        } else {
+            msg.innerHTML = '<span style="color:#4ade80">Username is available ✓</span>';
+            createBtn.disabled = false;
+        }
+    }
+
+    usernameInput.addEventListener('input', validateUsername);
+
+    // Run validation when modal is shown
+    signinModal.addEventListener('show', validateUsername);
 });
 </script>
 </body>
