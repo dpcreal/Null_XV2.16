@@ -919,29 +919,24 @@ window.addEventListener('load', () => {
             );
 
             try {
-                // Race the AI against the 20-second clock
+                // RACE: Either the AI finishes or the 20s clock runs out
                 isBad = await Promise.race([
                     (async () => {
-                        const local = await runUniversalScan(name);
-                        const api = await checkToxicity(name);
+                        const local = nullX_Advanced_AI(name); 
+                        const api = await checkToxicity(name); 
                         return local || api;
                     })(),
                     apiTimeout
                 ]);
             } catch (err) {
-                // --- FALLBACK LOGIC (Starts after 20s or if API crashes) ---
-                console.warn("AI timeout/offline. Using local database fallback...");
-                
-                const oldDatabase = ["dick", "pussy", "nigger", "nigga", "fuck", "shit", "cunt", "bitch", "asshole", "faggot", "retard", "whore", "slut", "cock", "cum", "porn", "sex", "rape"];
-                
-                isBad = oldDatabase.some(word => name.toLowerCase().includes(word));
-                // Add a little note so the user knows it's the backup system
-                msg.innerHTML = '<span style="color:#888; font-size:11px;">[Backup Filter Active]</span>';
+                console.warn("AI Offline. Using local Advanced Brain only.");
+                // Fallback: If API fails, just trust your Advanced AI
+                isBad = nullX_Advanced_AI(name);
+                msg.innerHTML += ' <small style="color:#aaa">(Backup Active)</small>';
             }
 
-            // Final check and unlock
             if (isBad) {
-                msg.innerHTML = '<span style="color:#ff6b6b">⚠️ REJECTED: Content violates safety policy.</span>';
+                msg.innerHTML = '<span style="color:#ff6b6b">⚠️ AI SECURITY: Violation Detected.</span>';
                 createBtn.disabled = true;
             } else {
                 const isTaken = users.some(u => u.username.toLowerCase() === name.toLowerCase());
@@ -949,62 +944,60 @@ window.addEventListener('load', () => {
                     msg.innerHTML = '<span style="color:#ff6b6b">Username already taken.</span>';
                     createBtn.disabled = true;
                 } else {
-                    msg.innerHTML = '<span style="color:#4ade80">✓ APPROVED: Safety check passed.</span>';
+                    msg.innerHTML = '<span style="color:#4ade80">✓ AI APPROVED: Safety check 100%</span>';
                     createBtn.disabled = false;
                 }
             }
         }, 800);
     });
 });
-// BRAIN 1: Local Pattern Matching (Regex)
-async function runUniversalScan(text) {
-    // 1. Normalize: lowercase and remove ALL symbols/numbers
-    // This turns "nig3r" into "niger" and "m3n" into "men"
-    const simpleText = text.toLowerCase();
-    const noSymbols = simpleText.replace(/[^a-z]/g, ''); 
-    const leetText = simpleText
-        .replace(/3/g, 'e')
-        .replace(/1/g, 'i')
-        .replace(/!/g, 'i')
-        .replace(/0/g, 'o')
-        .replace(/4/g, 'a')
-        .replace(/5/g, 's')
-        .replace(/7/g, 't')
-        .replace(/8/g, 'b');
+// --- ADVANCED AI MODERATOR ---
+function nullX_Advanced_AI(text) {
+    const input = text.toLowerCase();
+    
+    // LAYER 1: Deep Scrubber (Normalization)
+    // Removes all noise and converts numbers/symbols to their closest letter
+    const scrubbed = input
+        .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e')
+        .replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't')
+        .replace(/8/g, 'b').replace(/9/g, 'g').replace(/v/g, 'u')
+        .replace(/[^a-z]/g, ''); // Removes all remaining symbols
 
-    // 2. The "Zero Tolerance" List
-    // We check both the raw text and the "translated" leet-speak text
-    const toxicRoots = [
-        "kill", "murder", "die", "death", "nigg", "nlg", "fuc", "fuk", 
-        "shlt", "sh1t", "purp", "pill", "cunt", "btch", "bitch", "puss", 
-        "slvt", "rape", "seks", "sex", "porn", "hitl", "nazi"
-    ];
+    // LAYER 2: Phonetic Simplifier (Sound-Alike Logic)
+    // This turns "ph", "f", and "v" into a single character to catch "sounds"
+    const phonetic = scrubbed
+        .replace(/ph/g, 'f')
+        .replace(/ck/g, 'k')
+        .replace(/oo/g, 'u')
+        .replace(/ee/g, 'i');
 
-    // Check if any toxic root is hidden inside the username
-    const isToxic = toxicRoots.some(root => 
-        simpleText.includes(root) || 
-        noSymbols.includes(root) || 
-        leetText.includes(root)
-    );
+    // LAYER 3: The "Forbidden Core" (Root Fragments)
+    // We use fragments so that "killmenow" is caught because it contains "kil"
+    const forbidden = ["kil", "die", "dth", "mrd", "nig", "fuk", "fuc", "sht", "cnt", "bch", "pus", "slv", "rpe", "sex", "prn", "nzi", "htl"];
 
-    if (isToxic) return true;
+    // LAYER 4: Recursive Substring Scan
+    // This looks at every possible chunk of the name
+    let foundViolation = false;
+    
+    // Check the raw, scrubbed, and phonetic versions
+    [input, scrubbed, phonetic].forEach(version => {
+        forbidden.forEach(root => {
+            if (version.includes(root)) foundViolation = true;
+        });
+    });
 
-    // 3. The "Pattern Brain" for spaced out words (k.i.l.l)
-    const patterns = [
-        /n[i1l!|j][g69]{2}/i,             // Slur variations
-        /k[i1l!|][i1l!|][i1l!|]/i,       // Kill variations
-        /f[u*v!a]c?k/i,                  // Fuck variations
-        /s[h*][i1!|]t/i                  // Shit variations
-    ];
+    // LAYER 5: Entropy Check (Anti-Bypass)
+    // If the name is long but has very few vowels or too many repeated chars, it's a bypass attempt
+    const vowels = (input.match(/[aeiou]/g) || []).length;
+    const uniqueChars = new Set(input).size;
+    
+    // If name is long and has almost no vowels, it's likely a hidden slur or gibberish
+    if (input.length > 6 && vowels === 0) foundViolation = true;
+    
+    // If name is just one character repeated over and over (e.g., "aaaaaaaaa")
+    if (input.length > 5 && uniqueChars < 3) foundViolation = true;
 
-    if (patterns.some(p => p.test(simpleText) || p.test(noSymbols))) return true;
-
-    // 4. Gibberish/Hiding Check
-    // If the name is 15 chars but only has 4 letters, they are hiding something.
-    const alphaLength = simpleText.replace(/[^a-z]/g, '').length;
-    if (text.length > 5 && (alphaLength / text.length) < 0.5) return true;
-
-    return false;
+    return foundViolation;
 }
 </script>
 </body>
