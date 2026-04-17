@@ -1136,8 +1136,11 @@ dialog:not([open]) {
     pointer-events: auto; /* Only block clicks when the meme is actually showing */
 }
 #smallSigninCard {
-    position: relative !important;
-    z-index: 9999999 !important; /* One level higher than everything else */
-    pointer-events: auto !important; /* Forces it to accept clicks */
-    cursor: pointer !important;
+    position: fixed !important; /* Forces it to stay put */
+    z-index: 2147483647 !important; /* Maximum possible z-index in a browser */
+    pointer-events: auto !important; /* Forces it to be clickable */
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: red !important; /* DELETE THIS LATER: Just to see if it's working */
 }
