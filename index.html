@@ -1034,7 +1034,75 @@ window.addEventListener('load', () => {
     if (signinModal) {
         signinModal.addEventListener('show', validateUsername);
     }
+  // --- ADMIN & GLOBAL OVERRIDE ENGINE ---
+window.addEventListener('load', () => {
+    // 1. DATA CHECK: Is the current user the Admin?
+    // Note: Ensure your login system sets "username" in localStorage
+    const activeUser = localStorage.getItem("username"); 
+
+    if (activeUser === "Glaeesas") {
+        const adminBox = document.getElementById("adminControls");
+        if (adminBox) {
+            adminBox.style.display = "block";
+            console.log("Admin Access Granted: Welcome Glaeesas");
+        }
+    }
+
+    // 2. THE TRIGGER: Send the signal when the button is clicked
+    const rickBtn = document.getElementById("rickRollBtn");
+    if (rickBtn) {
+        rickBtn.addEventListener("click", () => {
+            const timestamp = Date.now();
+            // We use a unique string so the "listener" knows it's a new command
+            localStorage.setItem("global_trigger", "active_" + timestamp);
+            
+            // Visual feedback for the admin
+            rickBtn.innerText = "COMMAND SENT";
+            rickBtn.style.background = "#4ade80"; 
+            
+            setTimeout(() => {
+                rickBtn.innerText = "ACTIVATE GLOBAL RICKROLL";
+                rickBtn.style.background = "#ff4757";
+            }, 3000);
+        });
+    }
+
+    // 3. THE LISTENER: Everyone's browser watches for the signal
+    // We check every 2 seconds for a change in the 'global_trigger'
+    setInterval(() => {
+        const trigger = localStorage.getItem("global_trigger");
+
+        // If a trigger exists and we haven't played THIS specific one yet
+        if (trigger && window.lastProcessedTrigger !== trigger) {
+            playGlobalMeme();
+            window.lastProcessedTrigger = trigger; // Mark this specific signal as "done"
+        }
+    }, 2000);
 });
+
+// 4. THE EXECUTION: Showing the Rickroll to the user
+function playGlobalMeme() {
+    // Create the overlay using your new CSS ID
+    const overlay = document.createElement("div");
+    overlay.id = "rickroll-overlay";
+    
+    overlay.innerHTML = `
+        <img src="imgs/rickroll.gif" alt="System Override">
+        <h1>System Override: Admin Command</h1>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Auto-remove after 10 seconds to let them get back to the site
+    setTimeout(() => {
+        const activeMeme = document.getElementById("rickroll-overlay");
+        if (activeMeme) {
+            activeMeme.style.opacity = "0";
+            activeMeme.style.transition = "opacity 1s ease";
+            setTimeout(() => activeMeme.remove(), 1000);
+        }
+    }, 10000);
+}
 </script>
 </body>
 </html>
