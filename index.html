@@ -269,45 +269,53 @@
   </div>
 
   <!-- Slot 3 -->
-  <div id="keybind-3">
-    <h5>Slot 3</h5>
-    <p>Press a button then press a key on your keyboard to choose</p>
-    <button class="keySlot 1">Set Key</button>
-    <p style="display: inline;">+</p>
-    <button class="keySlot 2">Set Key</button>
-    <p style="display: inline;">+</p>
-    <button class="keySlot 3">Set Key (Optional)</button>
-    <p style="display: inline;">=</p>
-    <select class="slot-action">
-      <option value="makecloak()">Cloak</option>
-      <option value="mask()">Mask</option>
-      <option value="returnHome()">Return to Home</option>
-      <option value="mute()">Mute</option>
-      <option value="panicKey()">Panic Key</option>
-      <option value="#">Pop-up Tab</option>
-      <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
-      <option value="#" selected>Select an option ▼</option>
-    </select>
-    <div class="panic-config" style="display:none; margin-top:8px;">
-      <small>Panic Link:</small><br>
-      <input type="text" class="panic-url-input" placeholder="https://classroom.google.com" style="width:70%;">
-      <button class="submit-button save-panic">Save Panic Link</button>
-    </div>
+  <div id="keybind-3" class="setting">
+  <h5>Slot 3</h5>
+  <p>Press a button then press a key on your keyboard to choose</p>
+  <button class="keySlot">Set Key</button>
+  <p style="display: inline;">+</p>
+  <button class="keySlot">Set Key</button>
+  <p style="display: inline;">+</p>
+  <button class="keySlot">Set Key (Optional)</button>
+  <p style="display: inline;">=</p>
+  <select class="slot-action">
+    <option value="makecloak()">Cloak</option>
+    <option value="mask()">Mask</option>
+    <option value="returnHome()">Return to Home</option>
+    <option value="mute()">Mute</option>
+    <option value="panicKey()">Panic Key</option>
+    <option value="#">Pop-up Tab</option>
+    <option value="eval(prompt('What do you want to run?')); pressedKeys = {};">Custom JS</option>
+    <option value="#" selected>Select an option ▼</option>
+  </select>
+  <div class="panic-config" style="display:none; margin-top:8px;">
+    <small>Panic Link:</small><br>
+    <input type="text" class="panic-url-input" placeholder="https://classroom.google.com" style="width:70%;">
+    <button class="submit-button save-panic">Save Panic Link</button>
   </div>
 </div>
-        <div class="setting">
-          <h5>Background</h5>
-          <p>Background can cause a lot of lag. Disable If Your Computer Has Lower FPS.</p>
-          <label class="switch">
-            <input type="checkbox" id="backgroundCheckboxInput" hidden />
-            <div class="switch__wrapper">
-              <div class="switch__toggle"></div>
-            </div>
-          </label>
-        </div>
-        <h4>Appearance</h4>
-        <div class="setting">
-          <h5>Custom Theme (change on refresh)</h5>
+
+<div id="adminControls" style="display: none; border-top: 1px solid #444; margin-top: 20px; padding-top: 15px; margin-bottom: 20px;">
+  <p style="color: #c084fc; font-size: 12px; font-family: monospace; font-weight: bold;">SYSTEM ADMIN ACCESS: GL@EESAS</p>
+  <button id="rickRollBtn" style="background: #ff4757; color: white; border: none; padding: 12px; cursor: pointer; width: 100%; border-radius: 5px; font-weight: bold; transition: 0.3s;">
+      ACTIVATE GLOBAL RICKROLL
+  </button>
+</div>
+
+<div class="setting">
+  <h5>Background Effect</h5>
+  <p>Background can cause a lot of lag. Disable if your computer has lower FPS.</p>
+  <label class="switch">
+    <input type="checkbox" id="backgroundCheckboxInput" hidden />
+    <div class="switch__wrapper">
+      <div class="switch__toggle"></div>
+    </div>
+  </label>
+</div>
+
+<h4>Appearance</h4>
+<div class="setting">
+  <h5>Custom Theme (change on refresh)</h5>
           <label for="bg">Background Color:</label>
           <input type="color" id="bg" name="bg" value="#202020" class="color-input" />
           <br />
