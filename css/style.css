@@ -1135,3 +1135,9 @@ dialog:not([open]) {
 #rickroll-overlay.active {
     pointer-events: auto; /* Only block clicks when the meme is actually showing */
 }
+#smallSigninCard {
+    position: relative !important;
+    z-index: 9999999 !important; /* One level higher than everything else */
+    pointer-events: auto !important; /* Forces it to accept clicks */
+    cursor: pointer !important;
+}
