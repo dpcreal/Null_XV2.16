@@ -1079,7 +1079,7 @@ button.in-game-button[attr-snapped='true'] img {
 
 /* 2. Double check the Sign-in Card is on the top floor */
 .small-signin-card {
-    z-index: 2005 !important; /* Extremely high to beat any other overlays */
+    z-index: 999999 !important; /* Extremely high to beat any other overlays */
     pointer-events: auto !important;
 }
 
