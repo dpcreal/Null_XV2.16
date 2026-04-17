@@ -1088,3 +1088,47 @@ dialog:not([open]) {
     display: none !important;
     pointer-events: none;
 }
+/* --- ADMIN & GLOBAL OVERRIDE STYLES --- */
+
+/* Style for the Admin container in settings */
+#adminControls {
+    background: rgba(192, 132, 252, 0.05); /* Light purple tint */
+    border: 1px dashed #c084fc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Style for the actual Rickroll Overlay */
+#rickroll-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 999999; /* Ensures it is on top of everything */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+#rickroll-overlay img {
+    width: 80vw;
+    max-width: 600px;
+    border: 5px solid #ff4757;
+    box-shadow: 0 0 25px rgba(255, 71, 87, 0.6);
+    border-radius: 10px;
+}
+
+#rickroll-overlay h1 {
+    color: white;
+    font-family: 'monospace', sans-serif;
+    margin-top: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+}
