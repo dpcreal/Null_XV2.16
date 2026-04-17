@@ -1142,5 +1142,4 @@ dialog:not([open]) {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: red !important; /* DELETE THIS LATER: Just to see if it's working */
 }
