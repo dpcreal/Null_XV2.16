@@ -1132,3 +1132,6 @@ dialog:not([open]) {
     text-transform: uppercase;
     font-size: 1.5rem;
 }
+#rickroll-overlay.active {
+    pointer-events: auto; /* Only block clicks when the meme is actually showing */
+}
