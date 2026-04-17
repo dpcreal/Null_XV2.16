@@ -894,28 +894,76 @@ window.addEventListener('load', () => {
     if (!usernameInput || !msg || !createBtn) return;
 
     const badWords = [
-        // Core swears & sexual terms
-        "fuck", "fuk", "fck", "phuck", "shit", "sh1t", "sht", "cunt", "kunt", "bitch", "btch", 
-        "asshole", "asshole", "ass", "arse", "bollocks", "wanker", "twat", "pussy", "puss", 
-        "cock", "dick", "prick", "cocksucker", "motherfucker", "mf", "fucker", "fuckface", 
-        "cum", "jizz", "semen", "spunk", "whore", "slut", "slag", "hoe", "thot", "bimbo", 
-        "tit", "tits", "boob", "vagina", "penis", "clit", "labia", "rape", "rapist", "pedophile", 
-        "pedo", "molest", "incest", "bestiality", "porn", "porno", "xxx",
+    // === Core Swears & Sexual Terms ===
+    "fuck", "fuk", "fck", "phuck", "shit", "sh1t", "sht", "cunt", "kunt", "bitch", "btch", "asshole", "ass", "arse", 
+    "bollocks", "wanker", "twat", "pussy", "puss", "cock", "dick", "prick", "cocksucker", "motherfucker", "mf", 
+    "fucker", "fuckface", "cum", "jizz", "semen", "spunk", "whore", "slut", "slag", "hoe", "thot", "bimbo", 
+    "tit", "tits", "boob", "vagina", "penis", "clit", "labia", "rape", "rapist", "pedophile", "pedo", "molest", 
+    "incest", "bestiality", "porn", "porno", "xxx", "sex", "seks", "nude", "naked", "orgasm", "cumshot",
 
-        // Racial & ethnic slurs (very common ones)
-        "nigger", "nigga", "n1gger", "nigg3r", "ni99er", "nigguh", "niglet", "coon", "spook", 
-        "sambo", "junglebunny", "porchmonkey", "chink", "chingchong", "gook", "jap", "nip", 
-        "kike", "yid", "heeb", "beaner", "wetback", "spic", "spick", "paki", "towelhead", 
-        "raghead", "sandnigger", "hajji", "cracker", "honky", "redneck", "whitey", "wop", 
-        "dago", "kraut", "mick", "polack", "gyp", "gypsy", "injun", "redskin", "squaw",
+    // === Racial & Ethnic Slurs ===
+    "nigger", "nigga", "n1gger", "nigg3r", "ni99er", "nigguh", "niglet", "coon", "spook", "sambo", "junglebunny", 
+    "porchmonkey", "chink", "chingchong", "gook", "jap", "nip", "kike", "yid", "heeb", "beaner", "wetback", 
+    "spic", "spick", "paki", "towelhead", "raghead", "sandnigger", "hajji", "cracker", "honky", "redneck", 
+    "whitey", "wop", "dago", "kraut", "mick", "polack", "gyp", "gypsy", "injun", "redskin", "squaw", "tar baby",
 
-        // Ableist / other offensive
-        "retard", "r tard", "retarded", "spaz", "cripple", "mong", "mongoloid", "faggot", 
-        "fag", "fgt", "queer", "tranny", "trannie", "dyke", "lezzie", "homo", "fairy", 
-        "bastard", "basturd", "bitchass", "douche", "douchebag", "scum", "scumbag", 
-        "trash", "garbage", "idiot", "moron", "imbecile", "cretin", "cuck", "simp", "incel"
-    ];
+        // === Ableist & Disability Slurs ===
+    "retard", "r tard", "retarded", "tard", "tarded", "retardo", "tardo", "fucktard", "libtard", 
+    "spaz", "spastic", "spazzy", "spazzed", "cripple", "crip", "crippled", "gimp", "gimpy", 
+    "mong", "mongoloid", "downy", "downs", "down syndrome", "window licker", "short bus", 
+    "special ed", "special needs", "slow", "slowpoke", "slow learner", "vegetable", "veg", 
+    "braindead", "brain damage", "brain damaged", "feeble minded", "simpleton", "simple", 
+    "idiot", "idiotic", "moron", "moronic", "imbecile", "imbecilic", "cretin", "dumb", 
+    "dumbass", "stupid", "dim", "dimwit", "halfwit", "witless", "brainless", "airhead", 
+    "lame", "lamebrain", "invalid", "handicapped", "handicap", "disabled", "defective", 
+    "deformed", "birth defect", "hare lip", "club foot", "wheelchair bound", "confined to wheelchair", 
+    "autistic", "autist", "asperger", "aspie", "neurodivergent" /* (sometimes used negatively) */, 
+    "psycho", "psychotic", "schizo", "schizophrenic", "lunatic", "mad", "insane", "crazy", 
+    "nuts", "deranged", "derp", "derpy", "herp derp", "loony", "cuckoo", "batshit", 
+    "mental", "mentally ill", "psychopath", "sociopath", "mute", "deaf mute", "deaf and dumb", 
+    "blind", "dumb" /* (as in can't speak) */, "deaf", "lame", "paralyzed", "paralytic", 
+    "quadriplegic", "paraplegic", "vegetative", "coma", "comatose", "epileptic", "seizure", 
+    "spastic", "spaz", "midget", "dwarf", "stunted", "freak", "freakshow", "sideshow", 
+    "freak of nature", "mongrel", "subnormal", "subhuman", "deficient", "retardation",
 
+      
+            // === LGBTQ+ & Gender Slurs ===
+    "faggot", "fag", "fgt", "faggy", "fagget", "faggit", "fagg0t", "f4ggot", "f4g", "faggotry", "faggotty",
+    "queer", "queerbait", "queerboy", "queergirl", "qweir", "queero", "queerdo", "queerass", "queerfuck",
+    "tranny", "trannie", "trannies", "trannys", "tran", "transvestite", "transvest", "transvesty", "trans freak",
+    "shemale", "he-she", "heshe", "shim", "it", "thing", "creature", "abomination", "freak of nature",
+    "dyke", "dike", "bull dyke", "bulldyke", "lesbo", "lezzie", "lez", "lezbo", "lezbean", "lesbian" /* as insult */,
+    "homo", "hom0", "h0mo", "homosexual" /* as insult */, "fairy", "faerie", "fruit", "fruitcake", "flamer", 
+    "flamboyant", "pillow biter", "cock sucker", "cocksucker", "ass bandit", "ass pirate", "shirt lifter", 
+    "poof", "poofter", "poofta", "ponce", "nancy", "nancy boy", "sissy", "sissy boy", "sissies", "sissification",
+    "girly boy", "ladyboy", "lady boy", "boygirl", "boy girl", "trap", "traps", "troon", "troons", 
+    "trans freak", "gender bender", "gender confused", "confused", "groomer", "map", "minor attracted",
+    "ped0", "invert", "deviant", "pervert", "degenerate", "deg", "degeneracy", "sinner", "sodomite", "sodomy",
+    "butch", "butch lesbian", "butch dyke", "lipstick lesbian", "gold star", "carpet muncher", "rug muncher", 
+    "bean flicker", "muff diver", "fudge packer", "fudgepacker", "turkey stabber", "cock jockey", "cock gobbler",
+    "cum guzzler", "cum dumpster", "cum rag", "hole", "fuckhole", "cocksleeve", "fucktoy", "sex toy",
+    "crossdresser", "cd", "enby", "theyfab", "theythem", "attack helicopter", "pronoun", "pronouns",
+    "xir", "xer", "ze", "zir", "nonbinary", "non binary", "genderfluid", "gender special", "special snowflake",
+    "snowflake", "virtue signal", "soy boy", "soyboy", "beta male", "beta cuck", "cuck", "cuckold", "cuckservative",
+    "libtard", "lib", "leftist" /* used as gender insult */, "rainbow", "rainbow agenda", "gay agenda", "agenda",
+    "groom", "groomer", "predator", "child predator", "bathroom invader", "bathroom predator", "man in dress",
+    "man in wig", "fake woman", "fake man", "biological male", "biological female", "bio male", "bio female",
+    "xx", "xy", "delusional", "mentally ill", "gender dysphoria" /* as slur */, "autogynephile", "agp",
+    "trans identified", "ti", "tim", "tif", "trans identified male", "trans identified female",
+    "gender traitor", "traitor", "confused boy", "confused girl", "fake trans", "transtrender", "trend trans",
+    "attention whore", "attention seeker", "mental case", "psych case", "crazy queer", "freakshow", "sideshow",
+    "circus freak", "clown", "gender clown", "clown world", "woke", "woke scum", "woke trash",
+
+    // === Violence, Threats & Extremism (new section) ===
+    "kill", "killer", "murder", "murderer", "death", "suicide", "suicidal", "bomb", "bomber", "terrorist", 
+    "terrorism", "terror", "shoot", "shooter", "gun", "knife", "stab", "slay", "blood", "hang", "strangle", 
+    "rape", "rapist", "torture", "genocide", "jihad", "isis", "taliban", "hitler", "nazi", "heil",
+
+    // === General Insults & Degrading Terms ===
+    "bastard", "basturd", "bitchass", "douche", "douchebag", "scum", "scumbag", "trash", "garbage", "idiot", 
+    "moron", "imbecile", "cretin", "cuck", "simp", "incel", "virgin", "loser", "pathetic", "worthless", 
+    "useless", "stupid", "dumbass", "fucktard", "shithead", "asshat", "cumdump", "cumslut", "cumrag"
+];
     function normalize(name) {
         return name.toLowerCase()
             .replace(/[^a-z0-9]/g, '')           // remove symbols/spaces
