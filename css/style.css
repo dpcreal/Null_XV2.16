@@ -1143,3 +1143,59 @@ dialog:not([open]) {
     visibility: visible !important;
     opacity: 1 !important;
 }
+/* ====================== STRONGER FIX FOR SIGNIN MODAL CLICKABILITY ====================== */
+dialog#signinModal {
+  z-index: 2147483647 !important;   /* Highest possible z-index */
+  pointer-events: auto !important;
+}
+
+dialog#signinModal::backdrop {
+  background: rgba(0, 0, 0, 0.92) !important;
+  z-index: 2147483646 !important;
+}
+
+.modal-content {
+  position: relative;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
+
+.close-btn {
+  position: absolute !important;
+  top: 12px !important;
+  right: 15px !important;
+  z-index: 2147483648 !important;   /* Even higher than the content */
+  pointer-events: auto !important;
+  background: #ff4757 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 42px !important;
+  height: 42px !important;
+  font-size: 26px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
+}
+
+.close-btn:hover {
+  background: #ff0000 !important;
+  transform: scale(1.1);
+}
+
+/* Make sure nothing else covers the modal */
+#particles, 
+.cloaklaunch, 
+.loading, 
+#carRaceOverlay, 
+#secretUnlockPopup {
+  z-index: 10 !important;
+}
+
+/* Extra safety for the small sign-in card */
+.small-signin-card {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
