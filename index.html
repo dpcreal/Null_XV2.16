@@ -348,16 +348,23 @@
         </div>   <!-- this is the closing of .settings -->
 
     <!-- Small Sign-in Card -->
-<div class="small-signin-card" id="smallSigninCard" 
+<div class="small-signin-card" id="smallSigninCard"
      onclick="document.getElementById('signinModal').showModal()"
      style="cursor: pointer; user-select: none; z-index: 999999; position: relative;">
   Sign In / Account
 </div>
-    <!-- SIGN IN POP-UP MODAL -->
+
+<!-- SIGN IN POP-UP MODAL - FIXED -->
 <dialog id="signinModal">
   <div class="modal-content">
-    <!-- Red X to close -->
-    <button id="closeModalBtn" class="close-btn">✕</button>
+    <!-- Red X to close - FIXED -->
+    <button id="closeModalBtn" class="close-btn" 
+            style="position: absolute; top: 12px; right: 15px; font-size: 28px; 
+                   width: 40px; height: 40px; display: flex; align-items: center; 
+                   justify-content: center; background: #ff4757; color: white; 
+                   border: none; border-radius: 50%; cursor: pointer; z-index: 10;">
+      ✕
+    </button>
 
     <h1 class="glow">Null_X</h1>
     <p class="subtitle">Sign in for brand new features</p>
@@ -769,10 +776,25 @@ const closeBtn = document.getElementById("closeModalBtn");
 
 // --- 2. MODAL & TAB CONTROLS ---
 window.addEventListener('load', () => {
-    // Close button logic
-    if (closeBtn && signinModal) {
-        closeBtn.addEventListener('click', () => signinModal.close());
-    }
+    // Close button logic - FIXED
+const signinModal = document.getElementById('signinModal');
+const closeBtn = document.getElementById("closeModalBtn");
+
+if (closeBtn && signinModal) {
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        signinModal.close();
+    });
+}
+
+// Optional: Close when clicking outside the modal content (on backdrop)
+if (signinModal) {
+    signinModal.addEventListener('click', (e) => {
+        if (e.target === signinModal) {
+            signinModal.close();
+        }
+    });
+}
 
     // Open modal logic
     if (smallCard && signinModal) {
