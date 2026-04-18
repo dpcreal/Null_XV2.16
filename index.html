@@ -783,12 +783,26 @@ window.addEventListener('load', () => {
         });
     }
 
-    // Tab switching setup
+        // Tab switching setup - FIXED (no switchToTab function needed)
     const signupTab = document.getElementById("modalSignupTab");
     const loginTab = document.getElementById("modalLoginTab");
-    if (signupTab && loginTab) {
-        signupTab.addEventListener("click", () => switchToTab('signup'));
-        loginTab.addEventListener("click", () => switchToTab('login'));
+    const signupForm = document.getElementById("modalSignupForm");
+    const loginForm = document.getElementById("modalLoginForm");
+
+    if (signupTab && loginTab && signupForm && loginForm) {
+        signupTab.addEventListener("click", () => {
+            signupForm.classList.remove("hidden");
+            loginForm.classList.add("hidden");
+            signupTab.classList.add("active");
+            loginTab.classList.remove("active");
+        });
+
+        loginTab.addEventListener("click", () => {
+            signupForm.classList.add("hidden");
+            loginForm.classList.remove("hidden");
+            signupTab.classList.remove("active");
+            loginTab.classList.add("active");
+        });
     }
 
     // Restore logged-in state
@@ -797,25 +811,6 @@ window.addEventListener('load', () => {
         updateUILoggedIn(currentUser.username);
     }
 });
-
-function switchToTab(type) {
-    const signupForm = document.getElementById("modalSignupForm");
-    const loginForm = document.getElementById("modalLoginForm");
-    const signupTab = document.getElementById("modalSignupTab");
-    const loginTab = document.getElementById("modalLoginTab");
-
-    if (type === 'signup') {
-        signupForm.classList.remove("hidden");
-        loginForm.classList.add("hidden");
-        signupTab.classList.add("active");
-        loginTab.classList.remove("active");
-    } else {
-        signupForm.classList.add("hidden");
-        loginForm.classList.remove("hidden");
-        signupTab.classList.remove("active");
-        loginTab.classList.add("active");
-    }
-}
 
 // --- 3. SECURITY & HASHING ---
 async function hashPassword(password, salt) {
