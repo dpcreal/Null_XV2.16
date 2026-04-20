@@ -838,7 +838,7 @@ button.in-game-button[attr-snapped='true'] img {
   background: #1f2a38;
   color: #ddd;
   z-index: 900;
-  transition: width 0.35s ease, padding 0.35s ease;
+  transition: transform 0.35s ease, width 0.35s ease;
   padding: 20px;
   overflow-y: auto;
   box-shadow: 3px 0 15px rgba(0,0,0,0.4);
