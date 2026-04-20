@@ -848,10 +848,9 @@ button.in-game-button[attr-snapped='true'] img {
 }
 
 .member-sidebar.collapsed {
-  width: 68px;           /* narrow but button stays visible */
-  padding: 20px 10px;
-  overflow: hidden;
-  pointer-events: none;
+  transform: translateX(-100%); /* Moves it left, off the screen */
+  padding: 0; /* Prevents padding from creating a 'ghost' sliver on the edge */
+  width: 0;   /* Optional: set width to 0 to ensure it doesn't block clicks */
 }
 
 .member-sidebar.collapsed .sidebar-header h3,
