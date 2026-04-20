@@ -183,7 +183,7 @@
         </div>
         <div class="setting">
           <h5>Cloak URL</h5>
-          <p>This site will appear in your history instead of MonkeyGG2.</p>
+          <p>This site will appear in your history instead of Null_X.</p>
           <input id="cloakUrlInput" class="text-field" type="text" placeholder="https://classroom.google.com" />
           <button id="cloakUrlSubmit" class="submit-button">Submit</button>
         </div>
@@ -199,13 +199,13 @@
         </div>
         <div class="setting">
           <h5>Mask Title</h5>
-          <p>This site's title will replace MonkeyGG2's title in your browser tab.</p>
+          <p>This site's title will replace Null_X's title in your browser tab.</p>
           <input id="maskTitleInput" class="text-field" type="text" placeholder="Home" />
           <button id="maskTitleSubmit" class="submit-button">Submit</button>
         </div>
         <div class="setting">
           <h5>Mask Icon URL</h5>
-          <p> This site's icon will replace MonkeyGG2's icon in your browser tab. (Don't forget https://) </p>
+          <p> This site's icon will replace Null_X's icon in your browser tab. (Don't forget https://) </p>
           <input id="maskIconInput" class="text-field" type="text"
             placeholder="https://ssl.gstatic.com/classroom/ic_product_classroom_32.png" />
           <button id="maskIconSubmit" class="submit-button">Submit</button>
@@ -886,6 +886,7 @@ async function handleModalLogin() {
     const hashedInput = await hashPassword(passwordInput, user.salt);
     if (hashedInput === user.hashedPassword) {
         localStorage.setItem('null_x_current_user', JSON.stringify({ username: user.username }));
+        localStorage.setItem("username", user.username);
         updateUILoggedIn(user.username);
         msg.innerHTML = `<span style="color:#4ade80">Welcome, ${user.username}!</span>`;
         setTimeout(() => { if (signinModal) signinModal.close(); }, 800);
@@ -1051,7 +1052,6 @@ window.addEventListener('load', () => {
         signinModal.addEventListener('show', validateUsername);
     }
   // --- ADMIN & GLOBAL OVERRIDE ENGINE ---
-window.addEventListener('load', () => {
     // 1. DATA CHECK: Is the current user the Admin?
     // Note: Ensure your login system sets "username" in localStorage
     const activeUser = localStorage.getItem("username"); 
@@ -1076,13 +1076,13 @@ window.addEventListener('load', () => {
             rickBtn.innerText = "COMMAND SENT";
             rickBtn.style.background = "#4ade80"; 
             
-            setTimeout(() => {
+           setTimeout(() => {
                 rickBtn.innerText = "ACTIVATE GLOBAL RICKROLL";
                 rickBtn.style.background = "#ff4757";
             }, 3000);
-        });
-    }
-
+        }); // <--- NEEDED: Closes the rickBtn event listener
+    } // <--- NEEDED: Closes the "if (rickBtn)" check
+  
     // 3. THE LISTENER: Everyone's browser watches for the signal
     // We check every 2 seconds for a change in the 'global_trigger'
     setInterval(() => {
@@ -1104,7 +1104,7 @@ function playGlobalMeme() {
     
     overlay.innerHTML = `
         <img src="imgs/Rick.gif" alt="System Override">
-        <h1>System Override: Admin Command</h1>
+        <h1>Admin Command</h1>
     `;
     
     document.body.appendChild(overlay);
