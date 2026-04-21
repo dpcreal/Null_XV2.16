@@ -397,7 +397,6 @@
   <dialog id="signinModal">
     <!-- Close Button (moved outside modal-content for better event handling) -->
     <button id="closeModalBtn" class="close-btn" style="position: absolute; top: 12px; right: 15px; font-size: 28px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #ff4757; color: white; border: none; border-radius: 50%; cursor: pointer; z-index: 10; pointer-events: all;">✕</button>
-
     <div class="modal-content">
       <h1 class="glow">Null_X</h1>
       <p class="subtitle">Sign in for brand new features</p>
@@ -711,25 +710,25 @@
     }
 
     const signupTab = document.getElementById('modalSignupTab');
-    const loginTab = document.getElementById('modalLoginTab');
-    const signupForm = document.getElementById('modalSignupForm');
-    const loginForm = document.getElementById('modalLoginForm');
+const loginTab = document.getElementById('modalLoginTab');
+const signupForm = document.getElementById('modalSignupForm');
+const loginForm = document.getElementById('modalLoginForm');
 
-    if (signupTab && loginTab && signupForm && loginForm) {
-      signupTab.addEventListener('click', () => {
-        signupForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-        signupTab.classList.add('active');
-        loginTab.classList.remove('active');
-      });
+if (signupTab && loginTab && signupForm && loginForm) {
+  signupTab.addEventListener('click', () => {
+    signupForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+    signupTab.classList.add('active');
+    loginTab.classList.remove('active');
+  });
 
-      loginTab.addEventListener('click', () => {
-        signupForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-        signupTab.classList.remove('active');
-        loginTab.classList.add('active');
-      });
-    }
+  loginTab.addEventListener('click', () => {
+    signupForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+    signupTab.classList.remove('active');
+    loginTab.classList.add('active');
+  });
+}
 
     const currentUser = JSON.parse(localStorage.getItem('null_x_current_user'));
     if (currentUser && smallCard) {
