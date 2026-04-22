@@ -389,9 +389,11 @@
   </dialog>
 
   <!-- Small Sign-In Card -->
-  <div class="small-signin-card" id="smallSigninCard" onclick="document.getElementById('signinModal').showModal()" style="cursor: pointer; user-select: none; z-index: 999999; position: relative;">
-    Sign In / Account
-  </div>
+<div class="small-signin-card" id="smallSigninCard" 
+     onclick="document.getElementById('signinModal').showModal()"
+     style="cursor: pointer; user-select: none; z-index: 999999; position: relative;">
+  Sign In / Account
+</div>
 
   <!-- Sign-In Modal -->
   <dialog id="signinModal">
@@ -504,194 +506,211 @@
 
   <!-- All Inline JavaScript (Consolidated and Fixed) -->
   <script>
-    // Global variables
-    let users = JSON.parse(localStorage.getItem('null_x_users')) || [];
-    const signinModal = document.getElementById('signinModal');
-    const smallCard = document.getElementById('smallSigninCard');
-    const memberSidebar = document.getElementById('memberSidebar');
+  // ====================== CAR RACE LOCK ======================
+  const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b6c6f736572734c";
+  
+  function _0x3d9b(hex) {
+    let str = '';
+    for (let i = 0; i < hex.length; i += 2) {
+      str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return str;
+  }
+
+  const ATTEMPTS_PER_LEVEL = 3;
+  const LOCK_DURATIONS = [
+    3 * 60 * 1000,   // 3 minutes
+    10 * 60 * 1000,  // 10 minutes
+    60 * 60 * 1000,  // 1 hour
+    30 * 24 * 60 * 60 * 1000, // 30 days
+    365 * 24 * 60 * 60 * 1000, // 1 year
+    999999999 * 365 * 24 * 60 * 60 * 1000
+  ];
+
+  let carFailedAttempts = 0;
+  let carCurrentLockLevel = 0;
+  let carLockUntil = 0;
+  let countdownInterval = null;
+  let secretFailedAttempts = 0;
+
+  function loadCarLockState() {
+    const saved = localStorage.getItem('carRaceLockState');
+    if (saved) {
+      const data = JSON.parse(saved);
+      carFailedAttempts = data.failed || 0;
+      carCurrentLockLevel = data.level || 0;
+      carLockUntil = data.until || 0;
+    }
+  }
+
+  function saveCarLockState() {
+    localStorage.setItem('carRaceLockState', JSON.stringify({
+      failed: carFailedAttempts,
+      level: carCurrentLockLevel,
+      until: carLockUntil
+    }));
+  }
+
+  function isCarLocked() {
+    return Date.now() < carLockUntil;
+  }
+
+  function getCarLockTimeLeft() {
+    let seconds = Math.max(0, Math.ceil((carLockUntil - Date.now()) / 1000));
+    if (seconds === 0) return "0 seconds";
+    const h = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const m = Math.floor(seconds / 60);
+    seconds %= 60;
+    let parts = [];
+    if (h > 0) parts.push(h + "h");
+    if (m > 0) parts.push(m + "m");
+    parts.push(seconds + "s");
+    return parts.join(" ");
+  }
+
+  function startCountdown() {
+    if (countdownInterval) clearInterval(countdownInterval);
+    const msg = document.getElementById('carErrorMsg');
+    countdownInterval = setInterval(() => {
+      if (!isCarLocked()) {
+        clearInterval(countdownInterval);
+        msg.textContent = '';
+        return;
+      }
+      msg.style.color = '#ffaa00';
+      msg.innerHTML = 'Locked for ' + getCarLockTimeLeft() + '<br><small>Cannot type while locked</small>';
+    }, 1000);
+  }
+
+  function disableInputWhileLocked() {
+    const input = document.getElementById('carPassInput');
+    const button = document.querySelector('#carRaceOverlay button');
+    if (input) input.disabled = isCarLocked();
+    if (button) button.disabled = isCarLocked();
+  }
+
+  function checkCarPassword() {
+    if (isCarLocked()) return;
+    const input = document.getElementById('carPassInput');
+    const msg = document.getElementById('carErrorMsg');
+    const realPass = _0x3d9b(_0x4f2a);
+
+    if (input.value.trim() === realPass) {
+      msg.style.color = '#0f0';
+      msg.textContent = 'Correct! Loading game...';
+      resetAllLocks();
+      setTimeout(() => {
+        document.getElementById('carRaceOverlay').style.display = 'none';
+        loadCarRaceProxy();
+      }, 600);
+    } else {
+      input.value = '';
+      carFailedAttempts++;
+      saveCarLockState();
+      if (carFailedAttempts >= ATTEMPTS_PER_LEVEL) {
+        carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
+        carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
+        carFailedAttempts = 0;
+        msg.style.color = '#ff5555';
+        msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
+        saveCarLockState();
+        startCountdown();
+        disableInputWhileLocked();
+      } else {
+        msg.style.color = '#ff5555';
+        msg.textContent = 'Wrong password. ' + (ATTEMPTS_PER_LEVEL - carFailedAttempts) + ' attempts left.';
+      }
+    }
+  }
+
+  function handleSecretBoxClick(e) {
+    if (!e.ctrlKey || !isCarLocked()) return;
+    document.getElementById('secretUnlockPopup').style.display = 'flex';
+    document.getElementById('secretHexInput').value = '';
+    document.getElementById('secretMsg').textContent = '';
+    secretFailedAttempts = 0;
+  }
+
+  function checkSecretHex() {
+    const input = document.getElementById('secretHexInput');
+    const msg = document.getElementById('secretMsg');
+    const entered = input.value.trim().toLowerCase();
+    const correctHex = _0x4f2a;
+
+    if (entered === correctHex) {
+      msg.style.color = '#0f0';
+      msg.textContent = 'Correct. Timer reset.';
+      resetAllLocks();
+      setTimeout(() => {
+        document.getElementById('secretUnlockPopup').style.display = 'none';
+        document.getElementById('carRaceOverlay').style.display = 'none';
+        loadCarRaceProxy();
+      }, 800);
+    } else {
+      input.value = '';
+      secretFailedAttempts++;
+      if (secretFailedAttempts >= 3) {
+        msg.style.color = '#ff5555';
+        msg.textContent = 'Too many wrong attempts. Timer restarted at 3 minutes.';
+        document.getElementById('secretUnlockPopup').style.display = 'none';
+        carCurrentLockLevel = 0;
+        carLockUntil = Date.now() + LOCK_DURATIONS[0];
+        carFailedAttempts = 0;
+        saveCarLockState();
+        startCountdown();
+        disableInputWhileLocked();
+      } else {
+        msg.style.color = '#ff5555';
+        msg.textContent = 'Wrong hex. ' + (3 - secretFailedAttempts) + ' attempts left.';
+      }
+    }
+  }
+
+  function resetAllLocks() {
+    localStorage.removeItem('carRaceLockState');
+    carFailedAttempts = 0;
+    carCurrentLockLevel = 0;
+    carLockUntil = 0;
+    secretFailedAttempts = 0;
+    if (countdownInterval) clearInterval(countdownInterval);
+  }
+
+  function loadCarRaceProxy() {
+    document.getElementById('everything-else').style.display = 'none';
+    document.getElementById('page-loader').style.display = 'block';
+    document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/";
+  }
+
+  // ====================== SIGN-IN SYSTEM ======================
+  let users = JSON.parse(localStorage.getItem('null_x_users')) || [];
+  const signinModal = document.getElementById('signinModal');
+  const smallSigninCard = document.getElementById('smallSigninCard');
+  const memberSidebar = document.getElementById('memberSidebar');
+
+  // Hashing functions
+  async function hashPassword(password, salt) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const hash = await crypto.subtle.deriveBits({
+      name: "PBKDF2", 
+      salt: encoder.encode(salt), 
+      iterations: 600000, 
+      hash: "SHA-256"
+    }, key, 256);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function generateSalt() {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  // Modal controls
+  function setupModal() {
     const closeBtn = document.getElementById('closeModalBtn');
 
-    // Car Race Lock Variables and Functions (Completely Restored and Fixed)
-    const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b6c6f736572734c";
-    function _0x3d9b(hex) {
-      let str = '';
-      for (let i = 0; i < hex.length; i += 2) str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-      return str;
-    }
-    const ATTEMPTS_PER_LEVEL = 3;
-    const LOCK_DURATIONS = [180000, 600000, 3600000, 2592000000, 315360000000, 1e15];
-    let carFailedAttempts = 0, carCurrentLockLevel = 0, carLockUntil = 0, countdownInterval = null, secretFailedAttempts = 0;
-
-    function loadCarLockState() {
-      const saved = localStorage.getItem('carRaceLockState');
-      if (saved) {
-        const data = JSON.parse(saved);
-        carFailedAttempts = data.failed || 0;
-        carCurrentLockLevel = data.level || 0;
-        carLockUntil = data.until || 0;
-      }
-    }
-
-    function saveCarLockState() {
-      localStorage.setItem('carRaceLockState', JSON.stringify({
-        failed: carFailedAttempts,
-        level: carCurrentLockLevel,
-        until: carLockUntil
-      }));
-    }
-
-    function isCarLocked() {
-      return Date.now() < carLockUntil;
-    }
-
-    function getCarLockTimeLeft() {
-      let seconds = Math.max(0, Math.ceil((carLockUntil - Date.now()) / 1000));
-      if (seconds === 0) return "0 seconds";
-      const h = Math.floor(seconds / 3600);
-      seconds %= 3600;
-      const m = Math.floor(seconds / 60);
-      seconds %= 60;
-      let parts = [];
-      if (h > 0) parts.push(h + "h");
-      if (m > 0) parts.push(m + "m");
-      parts.push(seconds + "s");
-      return parts.join(" ");
-    }
-
-    function startCountdown() {
-      if (countdownInterval) clearInterval(countdownInterval);
-      const msg = document.getElementById('carErrorMsg');
-      countdownInterval = setInterval(() => {
-        if (!isCarLocked()) {
-          clearInterval(countdownInterval);
-          msg.textContent = '';
-          return;
-        }
-        msg.style.color = '#ffaa00';
-        msg.innerHTML = 'Locked for ' + getCarLockTimeLeft() + '<br><small>Cannot type while locked</small>';
-      }, 1000);
-    }
-
-    function disableInputWhileLocked() {
-      const input = document.getElementById('carPassInput');
-      const button = querySelector('#carRaceOverlay button');
-      if (input) input.disabled = isCarLocked();
-      if (button) button.disabled = isCarLocked();
-    }
-
-    function checkCarPassword() {
-      if (isCarLocked()) return;
-      const input = document.getElementById('carPassInput');
-      const msg = document.getElementById('carErrorMsg');
-      const realPass = _0x3d9b(_0x4f2a);
-      if (input.value.trim() === realPass) {
-        msg.style.color = '#0f0';
-        msg.textContent = 'Correct! Loading game...';
-        resetAllLocks();
-        setTimeout(() => {
-          document.getElementById('carRaceOverlay').style.display = 'none';
-          loadCarRaceProxy(); 
-        }, 600);
-      } else {
-        input.value = '';
-        carFailedAttempts++;
-        saveCarLockState();
-        if (carFailedAttempts >= ATTEMPTS_PER_LEVEL) {
-          carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
-          carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
-          carFailedAttempts = 0;
-          msg.style.color = '#ff5555';
-          msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
-          saveCarLockState();
-          startCountdown();
-          disableInputWhileLocked();
-        } else {
-          msg.style.color = '#ff5555';
-          msg.textContent = 'Wrong password. ' + (ATTEMPTS_PER_LEVEL - carFailedAttempts) + ' attempts left.';
-        }
-      }
-    }
-
-    function handleSecretBoxClick(e) {
-      if (!e.ctrlKey) return;
-      if (!isCarLocked()) return;
-      document.getElementById('secretUnlockPopup').style.display = 'flex';
-      document.getElementById('secretHexInput').value = '';
-      document.getElementById('secretMsg').textContent = '';
-      secretFailedAttempts = 0;
-    }
-
-    function checkSecretHex() {
-      const input = document.getElementById('secretHexInput');
-      const msg = document.getElementById('secretMsg');
-      const entered = input.value.trim().toLowerCase();
-      const correctHex = _0x4f2a;
-      if (entered === correctHex) {
-        msg.style.color = '#0f0';
-        msg.textContent = 'Correct. Timer reset.';
-        resetAllLocks();
-        setTimeout(() => {
-          document.getElementById('secretUnlockPopup').style.display = 'none';
-          document.getElementById('carRaceOverlay').style.display = 'none';
-          loadCarRaceProxy();
-        }, 800);
-      } else {
-        input.value = '';
-        secretFailedAttempts++;
-        if (secretFailedAttempts >= 3) {
-          msg.style.color = '#ff5555';
-          msg.textContent =
-'Too many wrong attempts. Timer restarted at 3 minutes.';
-          document.getElementById('secretUnlockPopup').style.display = 'none';
-          carCurrentLockLevel = 0;
-          carLockUntil = Date.now() + LOCK_DURATIONS[0];
-          carFailedAttempts = 0;
-          saveCarLockState();
-          startCountdown();
-          disableInputWhileLocked();
-        } else {
-          msg.style.color = '#ff5555';
-          msg.textContent = 'Wrong hex. ' + (3 - secretFailedAttempts) + ' attempts left.';
-        }
-      }
-    }
-
-    function resetAllLocks() {
-      localStorage.removeItem('carRaceLockState');
-      carFailedAttempts = 0;
-      carCurrentLockLevel = 0;
-      carLockUntil = 0;
-      secretFailedAttempts = 0;
-      if (countdownInterval) clearInterval(countdownInterval);
-    }
-
-    function showCarRacePassword() {
-      const overlay = document.getElementById('carRaceOverlay');
-      overlay.style.display = 'flex';
-      const input = document.getElementById('carPassInput');
-      if (input) {
-        input.value = '';
-        input.focus();
-      }
-      loadCarLockState();
-      const msg = document.getElementById('carErrorMsg');
-      if (isCarLocked()) {
-        msg.style.color = '#ffaa00';
-        msg.innerHTML = 'Locked for ' + getCarLockTimeLeft() + '<br><small>Cannot type while locked</small>';
-        startCountdown();
-      } else {
-        msg.textContent = '';
-      }
-      disableInputWhileLocked();
-    }
-
-    function loadCarRaceProxy() {
-      document.getElementById('everything-else').style.display = 'none';
-      document.getElementById('page-loader').style.display = 'block';
-      document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/";
-    }
-
-    // Modal & Tab Controls (Fixed)
     if (closeBtn && signinModal) {
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -705,80 +724,119 @@
       });
     }
 
-    if (smallCard && signinModal) {
-      smallCard.addEventListener('click', () => signinModal.showModal());
+    // Tab switching
+    const signupTab = document.getElementById("modalSignupTab");
+    const loginTab = document.getElementById("modalLoginTab");
+    const signupForm = document.getElementById("modalSignupForm");
+    const loginForm = document.getElementById("modalLoginForm");
+
+    if (signupTab && loginTab && signupForm && loginForm) {
+      signupTab.addEventListener("click", () => {
+        signupForm.classList.remove("hidden");
+        loginForm.classList.add("hidden");
+        signupTab.classList.add("active");
+        loginTab.classList.remove("active");
+      });
+      loginTab.addEventListener("click", () => {
+        signupForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        signupTab.classList.remove("active");
+        loginTab.classList.add("active");
+      });
     }
 
-    const signupTab = document.getElementById('modalSignupTab');
-const loginTab = document.getElementById('modalLoginTab');
-const signupForm = document.getElementById('modalSignupForm');
-const loginForm = document.getElementById('modalLoginForm');
-
-if (signupTab && loginTab && signupForm && loginForm) {
-  signupTab.addEventListener('click', () => {
-    signupForm.classList.remove('hidden');
-    loginForm.classList.add('hidden');
-    signupTab.classList.add('active');
-    loginTab.classList.remove('active');
-  });
-
-  loginTab.addEventListener('click', () => {
-    signupForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-    signupTab.classList.remove('active');
-    loginTab.classList.add('active');
-  });
-}
-
+    // Show logged in state
     const currentUser = JSON.parse(localStorage.getItem('null_x_current_user'));
-    if (currentUser && smallCard) {
-      smallCard.style.background = "#2ecc71";
-      smallCard.innerHTML = `Account<br><small>(${currentUser.username})</small> <span id="logoutLink" style="color:#ff6b6b; cursor:pointer; font-size:12px;">(Logout)</span>`;
+    if (currentUser && smallSigninCard) {
+      updateUILoggedIn(currentUser.username);
+    }
+  }
+
+  function updateUILoggedIn(username) {
+    if (smallSigninCard) {
+      smallSigninCard.style.background = "#2ecc71";
+      smallSigninCard.innerHTML = `Account<br><small>(${username})</small> <span id="logoutLink" style="color:#ff6b6b; cursor:pointer; font-size:12px;">(Logout)</span>`;
+    }
+    if (memberSidebar) memberSidebar.style.display = "flex";
+  }
+
+  // Signup & Login
+  async function handleModalSignup() {
+    const email = document.getElementById("modalSignupEmail").value.trim();
+    const username = document.getElementById("modalSignupUsername").value.trim();
+    const password = document.getElementById("modalSignupPassword").value;
+    const msg = document.getElementById("modalSignupMessage");
+
+    if (!email || !username || password.length < 8) {
+      msg.innerHTML = '<span style="color:#ff6b6b">All fields required. Password ≥ 8 chars.</span>';
+      return;
+    }
+    if (users.some(u => u.username.toLowerCase() === username.toLowerCase() || u.email === email)) {
+      msg.innerHTML = '<span style="color:#ff6b6b">Username or email taken.</span>';
+      return;
     }
 
-    // Signup & Login Logic
-    async function hashPassword(password, salt) {
-      const encoder = new TextEncoder();
-      const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-      const hash = await crypto.subtle.deriveBits({
-        name: "PBKDF2", salt: encoder.encode(salt), iterations: 600000, hash: "SHA-256"
-      }, key, 256);
-      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+    const salt = generateSalt();
+    const hashed = await hashPassword(password, salt);
+    users.push({ email, username, salt, hashedPassword: hashed });
+    localStorage.setItem('null_x_users', JSON.stringify(users));
+    msg.innerHTML = '<span style="color:#4ade80">Account created! Switch to Login tab.</span>';
+  }
+
+  async function handleModalLogin() {
+    const usernameInput = document.getElementById("modalLoginUsername").value.trim();
+    const passwordInput = document.getElementById("modalLoginPassword").value;
+    const msg = document.getElementById("modalLoginMessage");
+
+    const user = users.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
+    if (!user) {
+      msg.innerHTML = '<span style="color:#ff6b6b">User not found.</span>';
+      return;
     }
 
-    function generateSalt() {
-      const arr = new Uint8Array(16);
-      crypto.getRandomValues(arr);
-      return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+    const hashedInput = await hashPassword(passwordInput, user.salt);
+    if (hashedInput === user.hashedPassword) {
+      localStorage.setItem('null_x_current_user', JSON.stringify({ username: user.username }));
+      updateUILoggedIn(user.username);
+      msg.innerHTML = `<span style="color:#4ade80">Welcome, ${user.username}!</span>`;
+      setTimeout(() => { if (signinModal) signinModal.close(); }, 800);
+    } else {
+      msg.innerHTML = '<span style="color:#ff6b6b">Wrong password.</span>';
     }
+  }
 
-    async function handleModalSignup() {
-      const email = document.getElementById("modalSignupEmail").value.trim();
-      const username = document.getElementById("modalSignupUsername").value.trim();
-      const password = document.getElementById("modalSignupPassword").value;
-      const msg = document.getElementById("modalSignupMessage");
+  // Logout
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'logoutLink') {
+      localStorage.removeItem('null_x_current_user');
+      location.reload();
+    }
+  });
 
-      if (!email || !username || password.length < 8) {
-        msg.innerHTML = '<span style="color:#ff6b6b">All fields required. Password ≥ 8 chars.</span>';
-        return;
+  // Hide sign-in card when in game / proxy
+  function hideSigninCardInGame() {
+    const pageLoader = document.getElementById('page-loader');
+    if (!pageLoader || !smallSigninCard) return;
+
+    const observer = new MutationObserver(() => {
+      if (pageLoader.style.display === 'block' || pageLoader.style.display === '') {
+        smallSigninCard.style.display = 'none';
+      } else {
+        smallSigninCard.style.display = 'block';
       }
-      if (users.some(u => u.username.toLowerCase() === username.toLowerCase() || u.email === email)) {
-        msg.innerHTML = '<span style="color:#ff6b6b">Username/email taken.</span>';
-        return;
-      }
+    });
+    observer.observe(pageLoader, { attributes: true, attributeFilter: ['style'] });
+  }
 
-      const salt = generateSalt();
-      const hashed = await hashPassword(password, salt);
-      users.push({ email, username, salt, hashedPassword: hashed });
-      localStorage.setItem('null_x_users', JSON.stringify(users));
-      msg.innerHTML = '<span style="color:#4ade80">Account created! Switch to Login.</span>';
-    }
+  // Initialize everything when page loads
+  window.addEventListener('load', () => {
+    loadCarLockState();
+    setupModal();
+    hideSigninCardInGame();
 
-    async function handleModalLogin() {
-      const usernameInput = document.getElementById("modalLoginUsername").value.trim();
-      const passwordInput = document.getElementById("modalLoginPassword").value;
-      const msg = document.getElementById("modalLoginMessage");
-
-      const user = users.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
-      if (!user) {
-        msg.innerHTML = '<span style
+    // Optional: Show car race lock if needed
+    // showCarRacePassword();   // Uncomment if you want it to show on load
+  });
+</script>
+</body>
+</html>
