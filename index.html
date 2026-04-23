@@ -57,7 +57,7 @@
             </linearGradient>
           </defs>
           <g fill="none" stroke-linecap="round" stroke-width="16">
-            <g class="track" stroke="rgba(0,0,0,0)">
+            <g class="track" stroke="rgba(0,0,0)">
               <path d="M8,64s0-56,60-56,60,112,120,112,60-56,60-56" />
               <path d="M248,64s0-56-60-56-60,112-120,112S8,64,8,64" />
             </g>
@@ -77,11 +77,11 @@
   <!-- Main Content -->
   <section id="everything-else">
     <h1 id="title">Null_X 2.15</h1>
-    
+
     <logo>
       <img src="imgs/NX.png" alt="Null X Icon" />
     </logo>
-    
+
     <div id="particles"></div>
 
     <!-- Disabled Feature Dialog -->
@@ -116,6 +116,7 @@
             <div class="card" data="proxy">
               <div class="img-container">
                 <img src="imgs/download1.jpeg" alt="Proxy Icon" />
+                <button class="proxy-close" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;">✕</button>
               </div>
               <h5>Proxy</h5>
               <p>Proxy Doesn't Work Yet... I am working on getting it to work, It might work, I don't know, I hope it does eventually</p>
@@ -372,6 +373,18 @@
           <label for="font-color">Font Color:</label>
           <input type="color" id="font-color" name="font-color" value="#dcddde" class="color-input" />
           <br />
+          <label for="scrollbar-color">Scrollbar Color:</label>
+          <input type="color" id="scrollbar-color" name="scrollbar-color" value="#434343" class="color-input" />
+          <br />
+          <label for="scroll-track-color">Scroll Track Color:</label>
+          <input type="color" id="scroll-track-color" name="scroll-track-color" value="#111" class="color-input" />
+          <br />
+          <label for="font-color">Font Color:</label>
+          <input type="color" id="font-color" name="font-color" value="#dcddde" class="color-input" />
+          <br />
+          <label for="font-color">Background Color:</label>
+          <input type="color" id="bg2" name="bg2" value="#202020" class="color-input" />
+          <br />
           <button class="save-button" onclick="restoreColorChanges()">Restore Defaults</button>
           <button class="save-button" onclick="saveColorChanges()">Save Changes</button>
         </div>
@@ -389,15 +402,12 @@
   </dialog>
 
   <!-- Small Sign-In Card -->
-<div class="small-signin-card" id="smallSigninCard" 
-     onclick="document.getElementById('signinModal').showModal()"
-     style="cursor: pointer; user-select: none; z-index: 999999; position: relative;">
-  Sign In / Account
-</div>
+  <div class="small-signin-card" id="smallSigninCard" onclick="document.getElementById('signinModal').showModal()" style="cursor: pointer; user-select: none; z-index: 999999; position: relative;">
+    Sign In / Account
+  </div>
 
   <!-- Sign-In Modal -->
   <dialog id="signinModal">
-    <!-- Close Button (moved outside modal-content for better event handling) -->
     <button id="closeModalBtn" class="close-btn" style="position: absolute; top: 12px; right: 15px; font-size: 28px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #ff4757; color: white; border: none; border-radius: 50%; cursor: pointer; z-index: 10; pointer-events: all;">✕</button>
     <div class="modal-content">
       <h1 class="glow">Null_X</h1>
@@ -508,7 +518,7 @@
   <script>
   // ====================== CAR RACE LOCK ======================
   const _0x4f2a = "6361727261636569736170726f7879676f6f646c75636b6c6f736572734c";
-  
+
   function _0x3d9b(hex) {
     let str = '';
     for (let i = 0; i < hex.length; i += 2) {
@@ -575,11 +585,13 @@
     countdownInterval = setInterval(() => {
       if (!isCarLocked()) {
         clearInterval(countdownInterval);
-        msg.textContent = '';
+        if (msg) msg.textContent = '';
         return;
       }
-      msg.style.color = '#ffaa00';
-      msg.innerHTML = 'Locked for ' + getCarLockTimeLeft() + '<br><small>Cannot type while locked</small>';
+      if (msg) {
+        msg.style.color = '#ffaa00';
+        msg.innerHTML = 'Locked for ' + getCarLockTimeLeft() + '<br><small>Cannot type while locked</small>';
+      }
     }, 1000);
   }
 
@@ -597,8 +609,7 @@
     const realPass = _0x3d9b(_0x4f2a);
 
     if (input.value.trim() === realPass) {
-      msg.style.color = '#0f0';
-      msg.textContent = 'Correct! Loading game...';
+      if (msg) { msg.style.color = '#0f0'; msg.textContent = 'Correct! Loading game...'; }
       resetAllLocks();
       setTimeout(() => {
         document.getElementById('carRaceOverlay').style.display = 'none';
@@ -612,21 +623,26 @@
         carCurrentLockLevel = Math.min(carCurrentLockLevel + 1, LOCK_DURATIONS.length - 1);
         carLockUntil = Date.now() + LOCK_DURATIONS[carCurrentLockLevel];
         carFailedAttempts = 0;
-        msg.style.color = '#ff5555';
-        msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
+        if (msg) {
+          msg.style.color = '#ff5555';
+          msg.innerHTML = 'Too many wrong attempts!<br>Locked for ' + getCarLockTimeLeft();
+        }
         saveCarLockState();
         startCountdown();
         disableInputWhileLocked();
       } else {
-        msg.style.color = '#ff5555';
-        msg.textContent = 'Wrong password. ' + (ATTEMPTS_PER_LEVEL - carFailedAttempts) + ' attempts left.';
+        if (msg) {
+          msg.style.color = '#ff5555';
+          msg.textContent = 'Wrong password. ' + (ATTEMPTS_PER_LEVEL - carFailedAttempts) + ' attempts left.';
+        }
       }
     }
   }
 
   function handleSecretBoxClick(e) {
     if (!e.ctrlKey || !isCarLocked()) return;
-    document.getElementById('secretUnlockPopup').style.display = 'flex';
+    const popup = document.getElementById('secretUnlockPopup');
+    if (popup) popup.style.display = 'flex';
     document.getElementById('secretHexInput').value = '';
     document.getElementById('secretMsg').textContent = '';
     secretFailedAttempts = 0;
@@ -639,8 +655,7 @@
     const correctHex = _0x4f2a;
 
     if (entered === correctHex) {
-      msg.style.color = '#0f0';
-      msg.textContent = 'Correct. Timer reset.';
+      if (msg) { msg.style.color = '#0f0'; msg.textContent = 'Correct. Timer reset.'; }
       resetAllLocks();
       setTimeout(() => {
         document.getElementById('secretUnlockPopup').style.display = 'none';
@@ -651,8 +666,7 @@
       input.value = '';
       secretFailedAttempts++;
       if (secretFailedAttempts >= 3) {
-        msg.style.color = '#ff5555';
-        msg.textContent = 'Too many wrong attempts. Timer restarted at 3 minutes.';
+        if (msg) { msg.style.color = '#ff5555'; msg.textContent = 'Too many wrong attempts. Timer restarted at 3 minutes.'; }
         document.getElementById('secretUnlockPopup').style.display = 'none';
         carCurrentLockLevel = 0;
         carLockUntil = Date.now() + LOCK_DURATIONS[0];
@@ -661,8 +675,7 @@
         startCountdown();
         disableInputWhileLocked();
       } else {
-        msg.style.color = '#ff5555';
-        msg.textContent = 'Wrong hex. ' + (3 - secretFailedAttempts) + ' attempts left.';
+        if (msg) { msg.style.color = '#ff5555'; msg.textContent = 'Wrong hex. ' + (3 - secretFailedAttempts) + ' attempts left.'; }
       }
     }
   }
@@ -679,7 +692,8 @@
   function loadCarRaceProxy() {
     document.getElementById('everything-else').style.display = 'none';
     document.getElementById('page-loader').style.display = 'block';
-    document.getElementById('proxyFrame').src = "https://lausd.mathforkids.buzz/";
+    const frame = document.getElementById('proxyFrame');
+    if (frame) frame.src = "https://lausd.mathforkids.buzz/";
   }
 
   // ====================== SIGN-IN SYSTEM ======================
@@ -693,9 +707,9 @@
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
     const hash = await crypto.subtle.deriveBits({
-      name: "PBKDF2", 
-      salt: encoder.encode(salt), 
-      iterations: 600000, 
+      name: "PBKDF2",
+      salt: encoder.encode(salt),
+      iterations: 600000,
       hash: "SHA-256"
     }, key, 256);
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -710,26 +724,22 @@
   // Modal controls
   function setupModal() {
     const closeBtn = document.getElementById('closeModalBtn');
-
     if (closeBtn && signinModal) {
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         signinModal.close();
       });
     }
-
     if (signinModal) {
       signinModal.addEventListener('click', (e) => {
         if (e.target === signinModal) signinModal.close();
       });
     }
-
     // Tab switching
     const signupTab = document.getElementById("modalSignupTab");
     const loginTab = document.getElementById("modalLoginTab");
     const signupForm = document.getElementById("modalSignupForm");
     const loginForm = document.getElementById("modalLoginForm");
-
     if (signupTab && loginTab && signupForm && loginForm) {
       signupTab.addEventListener("click", () => {
         signupForm.classList.remove("hidden");
@@ -744,12 +754,9 @@
         loginTab.classList.add("active");
       });
     }
-
     // Show logged in state
     const currentUser = JSON.parse(localStorage.getItem('null_x_current_user'));
-    if (currentUser && smallSigninCard) {
-      updateUILoggedIn(currentUser.username);
-    }
+    if (currentUser && smallSigninCard) updateUILoggedIn(currentUser.username);
   }
 
   function updateUILoggedIn(username) {
@@ -817,7 +824,6 @@
   function hideSigninCardInGame() {
     const pageLoader = document.getElementById('page-loader');
     if (!pageLoader || !smallSigninCard) return;
-
     const observer = new MutationObserver(() => {
       if (pageLoader.style.display === 'block' || pageLoader.style.display === '') {
         smallSigninCard.style.display = 'none';
@@ -828,15 +834,14 @@
     observer.observe(pageLoader, { attributes: true, attributeFilter: ['style'] });
   }
 
-  // Initialize everything when page loads
+  // Initialize everything
   window.addEventListener('load', () => {
     loadCarLockState();
     setupModal();
     hideSigninCardInGame();
-
-    // Optional: Show car race lock if needed
-    // showCarRacePassword();   // Uncomment if you want it to show on load
+    // show car race lock on load if needed (comment out if not desired)
+    // showCarRacePassword();
   });
-</script>
+  </script>
 </body>
 </html>
