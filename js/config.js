@@ -1,8 +1,4 @@
-var json =/*
-    This file will contain all of the configuration for MonkeyGG2:
-    Games Info, Enable Proxy, Themes (coming soon)
-*/
-{
+var json = {
     "games": {
         /*
             Data for all games
