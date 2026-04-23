@@ -1,21 +1,5 @@
 var json = {
     "games": {
-        /*
-            Data for all games
-
-            "name-of-game": {
-                "path": "path/to/game",
-                "aliases": ["game", "emag"],
-                "categories": ["category1", "category2"]
-            }
-
-            Path will be path to game index from the games directory.
-            Aliases will be factored into search results.
-            Categories will display a little icon inside of the game's list item.
-
-            The list does not have to be ordered in any way but for the
-            sake of simplicity we will order this list alphanumerically.
-        */
         "1v1.LOL": {
             "path": "1v1-lol",
             "aliases": [],
@@ -1137,8 +1121,7 @@ var json = {
         // coming soon
     },
     "config": {
-        "proxy": false, // proxy only works when self-hosted
-        "proxyPath": "" // absolute or relative path to proxy; proxy must be set to true for this setting to have any effect.
-        // if you are using VioletGG2, all you need to do set proxy to "/proxy.html"
+        "proxy": false,
+        "proxyPath": ""
     }
 };
