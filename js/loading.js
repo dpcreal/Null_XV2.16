@@ -18,13 +18,24 @@ changeLoadingTip();
 let changeTip = setInterval(changeLoadingTip, 3000);
 
 // --- 2. THE "WAITER" & GAME LIST LOGIC ---
-// This replaces the old "Dual Run" crash-prone code
 function initSite() {
     // Check if the 'json' variable from config.js is actually here yet
     if (typeof json === 'undefined' || !json.games) {
         console.log("Waiting for config.js data...");
-        setTimeout(initSite, 50); // Check again in 50ms
+        setTimeout(initSite, 50); 
         return;
+    }
+
+    // --- CLOAK LOGIC INTEGRATION ---
+    // This applies your tab name and icon from config.js automatically
+    if (json.config && json.config.useCloak) {
+        document.title = json.config.tabName || "My Drive";
+        let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = json.config.tabIcon || "https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png";
+        document.getElementsByTagName('head')[0].appendChild(link);
+        console.log("Cloak applied.");
     }
 
     const games = json['games'];
@@ -39,16 +50,22 @@ function initSite() {
         );
     }
 
-    // Initialize Starring system
+    // Initialize UI Components
     setupStars();
     updateGameList();
     setupClickListeners();
     
-    // KILL THE LOADER
+    // KILL THE LOADER & FIX STUCK SETTINGS
     clearInterval(changeTip);
+
+    // CRITICAL FIX: Hide all UI menus before showing the site
+    $('.settings, .proxy, .cloaklaunch, .games').hide();
+
     $('.loading').fadeOut({
         duration: 300,
         complete: () => {
+            // Force hidden state one more time to be sure
+            $('.settings').hide(); 
             $('#everything-else').fadeIn(500);
         },
     });
@@ -58,7 +75,7 @@ function initSite() {
 let starredGamesList = JSON.parse(localStorage.getItem('starredGamesList')) || [];
 
 function setupStars() {
-    $(document).on('click', '.star', function (event) {
+    $(document).off('click', '.star').on('click', '.star', function (event) {
         event.preventDefault();
         event.stopPropagation();
         $(this).toggleClass('filled');
@@ -68,7 +85,6 @@ function setupStars() {
         const isStarred = starredGamesList.includes(gameName);
 
         if (isStarred) {
-            // FIXED: name !== gameName so it doesn't wipe the whole list
             starredGamesList = starredGamesList.filter((name) => name !== gameName);
         } else {
             starredGamesList.unshift(gameName);
@@ -97,7 +113,7 @@ function updateGameList() {
 
 // --- 4. NAVIGATION & PROXY ---
 function setupClickListeners() {
-    $('#gamesList li').on('click', function (e) {
+    $('#gamesList li').off('click').on('click', function (e) {
         if ($(e.target).hasClass('star')) return;
         
         let url = $(this).attr('url');
@@ -149,6 +165,13 @@ jQuery.fn.extend({
         fontFamily: 'monospace', fontSize: '24px', pointerEvents: 'none'
     });
 })();
+
+// EMERGENCY ESCAPE KEY
+$(document).on('keydown', function(e) {
+    if (e.key === "Escape") {
+        $('.settings, .proxy, .cloaklaunch').fadeOut(200);
+    }
+});
 
 // START EVERYTHING
 $(document).ready(() => {
