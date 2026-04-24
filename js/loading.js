@@ -27,7 +27,7 @@ function initSite() {
     }
 
     // --- CLOAK LOGIC INTEGRATION ---
-    // This applies your tab name and icon from config.js automatically
+    // Applies tab name and icon from config.js 
     if (json.config && json.config.useCloak) {
         document.title = json.config.tabName || "My Drive";
         let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -35,7 +35,6 @@ function initSite() {
         link.rel = 'shortcut icon';
         link.href = json.config.tabIcon || "https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png";
         document.getElementsByTagName('head')[0].appendChild(link);
-        console.log("Cloak applied.");
     }
 
     const games = json['games'];
@@ -55,18 +54,19 @@ function initSite() {
     updateGameList();
     setupClickListeners();
     
-    // KILL THE LOADER & FIX STUCK SETTINGS
+    // KILL THE LOADER & FORCE HIDE STUCK SETTINGS
     clearInterval(changeTip);
 
-    // CRITICAL FIX: Hide all UI menus before showing the site
-    $('.settings, .proxy, .cloaklaunch, .games').hide();
+    // BRUTE FORCE: Force hide all overlays with CSS override
+    $('.settings, .proxy, .cloaklaunch, .games').attr('style', 'display: none !important');
 
     $('.loading').fadeOut({
         duration: 300,
         complete: () => {
-            // Force hidden state one more time to be sure
-            $('.settings').hide(); 
+            // Re-confirm hidden state and show main container
+            $('.settings, .proxy, .cloaklaunch').attr('style', 'display: none !important');
             $('#everything-else').fadeIn(500);
+            console.log("Site initialized. UI forced clean.");
         },
     });
 }
@@ -166,14 +166,16 @@ jQuery.fn.extend({
     });
 })();
 
-// EMERGENCY ESCAPE KEY
+// EMERGENCY ESCAPE KEY & UI CLEANUP
 $(document).on('keydown', function(e) {
     if (e.key === "Escape") {
-        $('.settings, .proxy, .cloaklaunch').fadeOut(200);
+        $('.settings, .proxy, .cloaklaunch').attr('style', 'display: none !important');
     }
 });
 
 // START EVERYTHING
 $(document).ready(() => {
+    // Ensure overlays are hidden even before site starts
+    $('.settings, .proxy, .cloaklaunch').hide();
     initSite();
 });
