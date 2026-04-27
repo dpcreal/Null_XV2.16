@@ -77,3 +77,41 @@ dialog#signinModal::backdrop {
 #secretUnlockPopup {
   pointer-events: none;
 }
+/* FIX: only show home page at startup */
+.games,
+.settings,
+.proxy,
+#page-loader {
+  display: none !important;
+}
+
+.homepage {
+  display: flex !important;
+}
+
+/* When JS opens games/settings, let it show normally */
+.games[style*="display: block"],
+.settings[style*="display: block"],
+.games[style*="display: flex"],
+.settings[style*="display: flex"] {
+  display: flex !important;
+}
+
+/* Fix games page layout */
+.games {
+  flex-direction: column;
+}
+
+/* Fix game iframe page */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg);
+}
+
+#page-loader iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
